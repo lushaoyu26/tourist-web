@@ -10,6 +10,7 @@ import china from './asia/china.js'
 import hongkong from './asia/hongkong.js'
 import macau from './asia/macau.js'
 import mongolia from './asia/mongolia.js'
+import northkorea from './asia/northkorea.js'
 // 南亞
 import india from './asia/india.js'
 import srilanka from './asia/srilanka.js'
@@ -36,6 +37,14 @@ import oman from './asia/oman.js'
 import kuwait from './asia/kuwait.js'
 import saudiarabia from './asia/saudiarabia.js'
 import jordan from './asia/jordan.js'
+import iran from './asia/iran.js'
+import iraq from './asia/iraq.js'
+import syria from './asia/syria.js'
+import yemen from './asia/yemen.js'
+import lebanon from './asia/lebanon.js'
+import israel from './asia/israel.js'
+import palestine from './asia/palestine.js'
+import afghanistan from './asia/afghanistan.js'
 // 東南亞
 import vietnam from './asia/vietnam.js'
 import cambodia from './asia/cambodia.js'
@@ -46,6 +55,7 @@ import brunei from './asia/brunei.js'
 import indonesia from './asia/indonesia.js'
 import philippines from './asia/philippines.js'
 import easttimor from './asia/easttimor.js'
+import myanmar from './asia/myanmar.js'
 // 美洲
 import usa from './america/usa.js'
 import canada from './america/canada.js'
@@ -170,21 +180,24 @@ import albania from './europe/albania.js'
 import northMacedonia from './europe/north-macedonia.js'
 import kosovo from './europe/kosovo.js'
 import moldova from './europe/moldova.js'
+import russia from './europe/russia.js'
+import ukraine from './europe/ukraine.js'
+import belarus from './europe/belarus.js'
 
 // 依地理分組（導覽選單與目的地總覽頁共用）
 export const GROUPS = [
-  { id: 'east-asia', name: '東亞', emoji: '🏯', countries: [japan, korea, taiwan, china, hongkong, macau, mongolia] },
+  { id: 'east-asia', name: '東亞', emoji: '🏯', countries: [japan, korea, northkorea, taiwan, china, hongkong, macau, mongolia] },
   {
     id: 'southeast-asia',
     name: '東南亞',
     emoji: '🌴',
-    countries: [thailand, vietnam, singapore, malaysia, indonesia, philippines, cambodia, laos, brunei, easttimor],
+    countries: [thailand, vietnam, singapore, malaysia, indonesia, philippines, cambodia, laos, myanmar, brunei, easttimor],
   },
   {
     id: 'south-asia',
     name: '南亞',
     emoji: '🛕',
-    countries: [india, srilanka, maldives, nepal, bhutan, bangladesh, pakistan],
+    countries: [india, srilanka, maldives, nepal, bhutan, bangladesh, pakistan, afghanistan],
   },
   {
     id: 'central-asia',
@@ -193,10 +206,16 @@ export const GROUPS = [
     countries: [kazakhstan, uzbekistan, kyrgyzstan, tajikistan, turkmenistan],
   },
   {
+    id: 'caucasus-anatolia',
+    name: '高加索與安納托利亞',
+    emoji: '🏔️',
+    countries: [turkey, cyprus, georgia, armenia, azerbaijan],
+  },
+  {
     id: 'middle-east',
-    name: '西亞與中東',
+    name: '中東',
     emoji: '🕌',
-    countries: [turkey, georgia, armenia, azerbaijan, cyprus, uae, qatar, oman, kuwait, saudiarabia, jordan],
+    countries: [iran, iraq, syria, lebanon, israel, palestine, jordan, saudiarabia, kuwait, qatar, uae, oman, yemen],
   },
   {
     id: 'west-europe',
@@ -220,7 +239,7 @@ export const GROUPS = [
     id: 'central-europe',
     name: '中東歐',
     emoji: '🏰',
-    countries: [czechia, poland, hungary, slovakia, romania, bulgaria, moldova],
+    countries: [czechia, poland, hungary, slovakia, romania, bulgaria, moldova, ukraine, belarus, russia],
   },
   {
     id: 'balkans',
