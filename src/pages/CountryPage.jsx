@@ -51,6 +51,12 @@ export default function CountryPage() {
         </div>
       </section>
 
+      {country.advisory && (
+        <div className="advisory-banner" role="alert">
+          {country.advisory}
+        </div>
+      )}
+
       <section className="section">
         <div className="facts-grid">
           {Object.entries(country.facts).map(([key, value]) => (

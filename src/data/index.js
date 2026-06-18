@@ -75,6 +75,8 @@ import paraguay from './america/paraguay.js'
 import uruguay from './america/uruguay.js'
 import guyana from './america/guyana.js'
 import suriname from './america/suriname.js'
+import venezuela from './america/venezuela.js'
+import haiti from './america/haiti.js'
 // 非洲
 import egypt from './africa/egypt.js'
 import morocco from './africa/morocco.js'
@@ -100,6 +102,32 @@ import namibia from './africa/namibia.js'
 import angola from './africa/angola.js'
 import lesotho from './africa/lesotho.js'
 import eswatini from './africa/eswatini.js'
+// 非洲（補完）
+import libya from './africa/libya.js'
+import sudan from './africa/sudan.js'
+import mauritania from './africa/mauritania.js'
+import gambia from './africa/gambia.js'
+import guineabissau from './africa/guineabissau.js'
+import guinea from './africa/guinea.js'
+import sierraleone from './africa/sierraleone.js'
+import liberia from './africa/liberia.js'
+import benin from './africa/benin.js'
+import togo from './africa/togo.js'
+import nigeria from './africa/nigeria.js'
+import mali from './africa/mali.js'
+import niger from './africa/niger.js'
+import burkinafaso from './africa/burkinafaso.js'
+import cameroon from './africa/cameroon.js'
+import gabon from './africa/gabon.js'
+import congo from './africa/congo.js'
+import equatorialguinea from './africa/equatorialguinea.js'
+import drc from './africa/drc.js'
+import centralafrican from './africa/centralafrican.js'
+import chad from './africa/chad.js'
+import eritrea from './africa/eritrea.js'
+import somalia from './africa/somalia.js'
+import southsudan from './africa/southsudan.js'
+import burundi from './africa/burundi.js'
 // 大洋洲
 import australia from './oceania/australia.js'
 import newzealand from './oceania/newzealand.js'
@@ -202,15 +230,27 @@ export const GROUPS = [
   },
   {
     id: 'north-africa',
-    name: '北非與西非',
+    name: '北非',
     emoji: '🐪',
-    countries: [egypt, morocco, tunisia, algeria, senegal, ghana, ivorycoast],
+    countries: [egypt, morocco, tunisia, algeria, libya, sudan, mauritania],
+  },
+  {
+    id: 'west-africa',
+    name: '西非',
+    emoji: '🥁',
+    countries: [senegal, gambia, guineabissau, guinea, sierraleone, liberia, ivorycoast, ghana, togo, benin, nigeria, mali, niger, burkinafaso],
+  },
+  {
+    id: 'central-africa',
+    name: '中非',
+    emoji: '🦍',
+    countries: [cameroon, equatorialguinea, gabon, congo, drc, centralafrican, chad],
   },
   {
     id: 'east-africa',
     name: '東非',
     emoji: '🦁',
-    countries: [ethiopia, djibouti, kenya, tanzania, uganda, rwanda, madagascar, malawi],
+    countries: [ethiopia, eritrea, djibouti, somalia, southsudan, kenya, tanzania, uganda, rwanda, burundi, madagascar, malawi],
   },
   {
     id: 'southern-africa',
@@ -223,13 +263,13 @@ export const GROUPS = [
     id: 'central-america',
     name: '中美洲與加勒比海',
     emoji: '🏝️',
-    countries: [guatemala, belize, honduras, elsalvador, nicaragua, costarica, panama, cuba, jamaica, dominican, bahamas, trinidad, puertorico],
+    countries: [guatemala, belize, honduras, elsalvador, nicaragua, costarica, panama, cuba, jamaica, dominican, haiti, bahamas, trinidad, puertorico],
   },
   {
     id: 'south-america',
     name: '南美洲',
     emoji: '🗿',
-    countries: [peru, brazil, argentina, chile, bolivia, colombia, ecuador, paraguay, uruguay, guyana, suriname],
+    countries: [peru, brazil, argentina, chile, bolivia, colombia, ecuador, venezuela, paraguay, uruguay, guyana, suriname],
   },
   {
     id: 'oceania',

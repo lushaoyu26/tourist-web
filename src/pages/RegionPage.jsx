@@ -64,6 +64,12 @@ export default function RegionPage() {
         </div>
       </section>
 
+      {country.advisory && (
+        <div className="advisory-banner" role="alert">
+          {country.advisory}
+        </div>
+      )}
+
       <nav className="section-nav">
         {SECTIONS.map((s) => (
           <button key={s.id} onClick={() => scrollTo(s.id)}>
