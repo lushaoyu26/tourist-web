@@ -49,20 +49,65 @@ import easttimor from './asia/easttimor.js'
 // 美洲
 import usa from './america/usa.js'
 import canada from './america/canada.js'
+import mexico from './america/mexico.js'
+import greenland from './america/greenland.js'
+import guatemala from './america/guatemala.js'
+import belize from './america/belize.js'
+import honduras from './america/honduras.js'
+import elsalvador from './america/elsalvador.js'
+import nicaragua from './america/nicaragua.js'
+import costarica from './america/costarica.js'
+import panama from './america/panama.js'
+import cuba from './america/cuba.js'
+import jamaica from './america/jamaica.js'
+import dominican from './america/dominican.js'
+import bahamas from './america/bahamas.js'
+import trinidad from './america/trinidad.js'
+import puertorico from './america/puertorico.js'
 import peru from './america/peru.js'
 import brazil from './america/brazil.js'
 import argentina from './america/argentina.js'
 import chile from './america/chile.js'
 import bolivia from './america/bolivia.js'
+import colombia from './america/colombia.js'
+import ecuador from './america/ecuador.js'
+import paraguay from './america/paraguay.js'
+import uruguay from './america/uruguay.js'
+import guyana from './america/guyana.js'
+import suriname from './america/suriname.js'
 // 非洲
 import egypt from './africa/egypt.js'
 import morocco from './africa/morocco.js'
+import tunisia from './africa/tunisia.js'
+import algeria from './africa/algeria.js'
+import senegal from './africa/senegal.js'
+import ghana from './africa/ghana.js'
+import ivorycoast from './africa/ivorycoast.js'
+import ethiopia from './africa/ethiopia.js'
+import djibouti from './africa/djibouti.js'
 import kenya from './africa/kenya.js'
 import tanzania from './africa/tanzania.js'
+import uganda from './africa/uganda.js'
+import rwanda from './africa/rwanda.js'
+import madagascar from './africa/madagascar.js'
+import malawi from './africa/malawi.js'
 import southafrica from './africa/southafrica.js'
+import mozambique from './africa/mozambique.js'
+import zambia from './africa/zambia.js'
+import zimbabwe from './africa/zimbabwe.js'
+import botswana from './africa/botswana.js'
+import namibia from './africa/namibia.js'
+import angola from './africa/angola.js'
+import lesotho from './africa/lesotho.js'
+import eswatini from './africa/eswatini.js'
 // 大洋洲
 import australia from './oceania/australia.js'
 import newzealand from './oceania/newzealand.js'
+import fiji from './oceania/fiji.js'
+import papuanewguinea from './oceania/papuanewguinea.js'
+import solomonislands from './oceania/solomonislands.js'
+import vanuatu from './oceania/vanuatu.js'
+import newcaledonia from './oceania/newcaledonia.js'
 // 歐洲
 import spain from './europe/spain.js'
 import portugal from './europe/portugal.js'
@@ -155,10 +200,43 @@ export const GROUPS = [
     emoji: '⛰️',
     countries: [serbia, bosnia, montenegro, albania, northMacedonia, kosovo],
   },
-  { id: 'africa', name: '非洲', emoji: '🦁', countries: [egypt, morocco, kenya, tanzania, southafrica] },
-  { id: 'north-america', name: '北美洲', emoji: '🗽', countries: [usa, canada] },
-  { id: 'south-america', name: '南美洲', emoji: '🗿', countries: [peru, brazil, argentina, chile, bolivia] },
-  { id: 'oceania', name: '大洋洲', emoji: '🦘', countries: [australia, newzealand] },
+  {
+    id: 'north-africa',
+    name: '北非與西非',
+    emoji: '🐪',
+    countries: [egypt, morocco, tunisia, algeria, senegal, ghana, ivorycoast],
+  },
+  {
+    id: 'east-africa',
+    name: '東非',
+    emoji: '🦁',
+    countries: [ethiopia, djibouti, kenya, tanzania, uganda, rwanda, madagascar, malawi],
+  },
+  {
+    id: 'southern-africa',
+    name: '南部非洲',
+    emoji: '🐘',
+    countries: [southafrica, mozambique, zambia, zimbabwe, botswana, namibia, angola, lesotho, eswatini],
+  },
+  { id: 'north-america', name: '北美洲', emoji: '🗽', countries: [usa, canada, mexico, greenland] },
+  {
+    id: 'central-america',
+    name: '中美洲與加勒比海',
+    emoji: '🏝️',
+    countries: [guatemala, belize, honduras, elsalvador, nicaragua, costarica, panama, cuba, jamaica, dominican, bahamas, trinidad, puertorico],
+  },
+  {
+    id: 'south-america',
+    name: '南美洲',
+    emoji: '🗿',
+    countries: [peru, brazil, argentina, chile, bolivia, colombia, ecuador, paraguay, uruguay, guyana, suriname],
+  },
+  {
+    id: 'oceania',
+    name: '大洋洲',
+    emoji: '🦘',
+    countries: [australia, newzealand, fiji, papuanewguinea, solomonislands, vanuatu, newcaledonia],
+  },
 ]
 
 export const COUNTRIES = GROUPS.flatMap((g) => g.countries)
