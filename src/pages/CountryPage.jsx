@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { Link, useParams, Navigate } from 'react-router-dom'
 import WikiImage from '../components/WikiImage.jsx'
 import { getCountry } from '../data/index.js'
+import { useTrip } from '../hooks/useTrip.jsx'
+import { defaultDays } from '../services/trip.js'
 
 const FACT_LABELS = {
   currency: { icon: '💰', label: '貨幣匯率' },
@@ -15,6 +17,7 @@ const FACT_LABELS = {
 export default function CountryPage() {
   const { countryId } = useParams()
   const country = getCountry(countryId)
+  const { has, toggle } = useTrip()
 
   useEffect(() => {
     if (country) document.title = `${country.name}旅遊攻略｜漫遊地球`
@@ -88,6 +91,17 @@ export default function CountryPage() {
               <div className="region-card-media">
                 <WikiImage wiki={region.wiki} alt={region.name} emoji={region.emoji} />
                 <span className="region-card-emoji">{region.emoji}</span>
+                <button
+                  className={`region-card-trip ${has(country.id, region.id) ? 'added' : ''}`}
+                  title={has(country.id, region.id) ? '已在行程中' : '加入我的行程'}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    toggle(country.id, region.id, defaultDays(region))
+                  }}
+                >
+                  {has(country.id, region.id) ? '✓ 已加入' : '＋ 加入行程'}
+                </button>
               </div>
               <div className="region-card-body">
                 <h3>

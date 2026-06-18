@@ -7,6 +7,8 @@ import HotelPanel from '../components/HotelPanel.jsx'
 import BudgetEstimator from '../components/BudgetEstimator.jsx'
 import PhotoWall from '../components/PhotoWall.jsx'
 import { getRegion } from '../data/index.js'
+import { useTrip } from '../hooks/useTrip.jsx'
+import { defaultDays } from '../services/trip.js'
 
 const SECTIONS = [
   { id: 'transport', icon: '✈️', label: '怎麼去' },
@@ -23,6 +25,8 @@ export default function RegionPage() {
   const { country, region } = getRegion(countryId, regionId)
   const [origin, setOrigin] = useState('TPE')
   const [month, setMonth] = useState(new Date().getMonth() + 1)
+  const { has, toggle } = useTrip()
+  const inTrip = region ? has(countryId, regionId) : false
 
   useEffect(() => {
     if (region) document.title = `${region.name}完整攻略｜漫遊地球`
@@ -61,6 +65,12 @@ export default function RegionPage() {
             <span className="chip chip-glass">🌸 {region.bestSeason}</span>
             <span className="chip chip-glass">🛬 {region.airport.code}</span>
           </div>
+          <button
+            className={`trip-add-btn region-hero-trip ${inTrip ? 'added' : ''}`}
+            onClick={() => toggle(countryId, regionId, defaultDays(region))}
+          >
+            {inTrip ? '✓ 已加入行程' : '＋ 加入我的行程'}
+          </button>
         </div>
       </section>
 
