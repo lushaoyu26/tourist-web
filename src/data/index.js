@@ -317,6 +317,18 @@ export function getRegion(countryId, regionId) {
   return { country, region }
 }
 
+// 所有「國家+區域」的扁平清單（隨機探索、統計用）
+export const ALL_STOPS = COUNTRIES.flatMap((c) =>
+  c.regions.map((r) => ({ countryId: c.id, regionId: r.id }))
+)
+
+// 隨機挑一個區域；可排除某個 id 以避免抽到同一個
+export function getRandomRegionPath(excludeRegionId) {
+  const pool = excludeRegionId ? ALL_STOPS.filter((s) => s.regionId !== excludeRegionId) : ALL_STOPS
+  const pick = pool[Math.floor(Math.random() * pool.length)]
+  return `/country/${pick.countryId}/region/${pick.regionId}`
+}
+
 // GeoJSON ADMIN 英文名 → 中文（用於地球上尚未收錄攻略的國家）
 export const ADMIN_ZH = {
   'United States of America': '美國', Canada: '加拿大', Mexico: '墨西哥', Brazil: '巴西',

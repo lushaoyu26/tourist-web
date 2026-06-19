@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, Navigate } from 'react-router-dom'
+import { Link, useParams, Navigate, useNavigate } from 'react-router-dom'
 import WikiImage from '../components/WikiImage.jsx'
 import GuideMap from '../components/GuideMap.jsx'
 import FlightPanel from '../components/FlightPanel.jsx'
 import HotelPanel from '../components/HotelPanel.jsx'
 import BudgetEstimator from '../components/BudgetEstimator.jsx'
 import PhotoWall from '../components/PhotoWall.jsx'
-import { getRegion } from '../data/index.js'
+import { getRegion, getRandomRegionPath } from '../data/index.js'
 import { useTrip } from '../hooks/useTrip.jsx'
 import { defaultDays } from '../services/trip.js'
 
@@ -22,6 +22,7 @@ const SECTIONS = [
 
 export default function RegionPage() {
   const { countryId, regionId } = useParams()
+  const navigate = useNavigate()
   const { country, region } = getRegion(countryId, regionId)
   const [origin, setOrigin] = useState('TPE')
   const [month, setMonth] = useState(new Date().getMonth() + 1)
@@ -170,6 +171,9 @@ export default function RegionPage() {
         <Link to={`/country/${country.id}`} className="btn btn-ghost">
           ← 回{country.name}總覽
         </Link>
+        <button className="btn btn-ghost" onClick={() => navigate(getRandomRegionPath(regionId))}>
+          🎲 隨機探索另一個城市
+        </button>
         <Link to="/" className="btn btn-primary">
           🌏 探索其他國家
         </Link>

@@ -1,10 +1,12 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { COUNTRIES, COUNTRY_BY_ID, FEATURED_IDS } from '../data/index.js'
+import { Link, useNavigate } from 'react-router-dom'
+import { COUNTRIES, COUNTRY_BY_ID, FEATURED_IDS, ALL_STOPS, getRandomRegionPath } from '../data/index.js'
 
 const WorldGlobe = lazy(() => import('../components/WorldGlobe.jsx'))
 
 export default function HomePage() {
+  const navigate = useNavigate()
+
   useEffect(() => {
     document.title = '漫遊地球 WanderGlobe｜互動旅遊攻略'
   }, [])
@@ -22,6 +24,9 @@ export default function HomePage() {
           找到你的下一場旅行
         </h1>
         <p>滑鼠懸停國家立即浮起預覽 · 點擊深入區域攻略、機票住宿與預算估算</p>
+        <button className="home-random" onClick={() => navigate(getRandomRegionPath())}>
+          🎲 隨機探索一個城市
+        </button>
       </div>
 
       <div className="home-hint">🖱️ 拖曳旋轉 · 滾輪縮放 · 懸停預覽 · 點擊探索</div>
@@ -36,7 +41,7 @@ export default function HomePage() {
         ))}
         <Link to="/destinations" className="home-chip home-chip-more" style={{ '--chip': '#6ee7d8' }}>
           <span className="home-chip-flag">🗺️</span>
-          <span>全部 {COUNTRIES.length} 個目的地</span>
+          <span>{COUNTRIES.length} 國 · {ALL_STOPS.length} 城市</span>
         </Link>
       </div>
     </div>

@@ -308,6 +308,28 @@ img {
   max-width: 40ch;
 }
 
+.home-random {
+  margin-top: 22px;
+  padding: 13px 26px;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #06122b;
+  background: linear-gradient(120deg, #6ee7d8, #38bdf8);
+  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+  pointer-events: auto;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.home-random:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 16px 40px rgba(56, 189, 248, 0.55);
+}
+
+.home-random:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
 .home-hint {
   position: absolute;
   top: 78px;
