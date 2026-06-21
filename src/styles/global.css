@@ -21,6 +21,59 @@
   --shadow-lg: 0 24px 60px rgba(22, 33, 62, 0.16);
 }
 
+/* ============ 深色模式 ============ */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --ink: #e8ecf8;
+  --ink-soft: #aab4d0;
+  --ink-faint: #717a9a;
+  --bg: #070b18;
+  --card: #121a2b;
+  --line: #243049;
+  --shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.62);
+}
+
+/* 覆寫少數硬編碼淺色面板，讓深色模式一致 */
+[data-theme='dark'] .navbar {
+  background: rgba(11, 16, 30, 0.82);
+  border-bottom-color: var(--line);
+}
+[data-theme='dark'] .mega-menu {
+  background: rgba(16, 22, 38, 0.98);
+}
+[data-theme='dark'] .section-nav {
+  background: rgba(16, 22, 38, 0.9);
+}
+[data-theme='dark'] .region-card-trip {
+  background: rgba(18, 26, 43, 0.92);
+  color: var(--ink);
+}
+[data-theme='dark'] .poi-pin {
+  background: var(--card);
+}
+
+/* 切換亮／暗色主題的圓鈕 */
+.navbar-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-left: 4px;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  line-height: 1;
+  transition: background 0.2s, transform 0.2s;
+}
+.navbar-theme-btn:hover {
+  background: rgba(20, 184, 166, 0.16);
+  transform: translateY(-1px) scale(1.05);
+}
+.navbar-dark .navbar-theme-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -2213,4 +2266,131 @@ img {
   .photo-wall {
     columns: 2 160px;
   }
+}
+
+/* ============ 城市全年旅遊指數（最佳月份色帶） ============ */
+.best-months {
+  max-width: 1100px;
+  margin: 22px auto 0;
+  padding: 18px 22px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.best-months-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.best-months-head h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.best-months-season {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.best-months-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 6px;
+}
+.bm-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--ink-faint) 12%, transparent);
+}
+.bm-cell.bm-best {
+  background: rgba(16, 185, 129, 0.18);
+  color: #047857;
+}
+.bm-cell.bm-ok {
+  background: rgba(245, 178, 7, 0.18);
+  color: #b45309;
+}
+.bm-cell.bm-low {
+  background: color-mix(in srgb, var(--ink-faint) 14%, transparent);
+  color: var(--ink-faint);
+}
+[data-theme='dark'] .bm-cell.bm-best { color: #6ee7b7; }
+[data-theme='dark'] .bm-cell.bm-ok { color: #fcd34d; }
+.bm-cell.bm-now {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.bm-now-tag {
+  position: absolute;
+  top: -9px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--accent);
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.best-months-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  flex-wrap: wrap;
+}
+.bm-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bm-key {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.bm-key.bm-best { background: rgba(16, 185, 129, 0.55); }
+.bm-key.bm-ok { background: rgba(245, 178, 7, 0.6); }
+.bm-key.bm-low { background: color-mix(in srgb, var(--ink-faint) 35%, transparent); }
+.bm-note { font-style: italic; }
+
+@media (max-width: 640px) {
+  .best-months { margin-left: 16px; margin-right: 16px; padding: 16px; }
+  .best-months-grid { gap: 4px; }
+  .bm-cell { font-size: 0.72rem; padding: 6px 0 8px; }
+}
+
+/* ============ 行程分享按鈕 ============ */
+.trip-share-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.trip-share {
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+.trip-share:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.panel-note-share {
+  color: var(--ink-faint);
 }

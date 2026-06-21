@@ -1,22 +1,51 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import WikiImage from '../components/WikiImage.jsx'
 import { useTrip } from '../hooks/useTrip.jsx'
 import { getRegion } from '../data/index.js'
 import { ORIGINS, MONTHS } from '../services/flights.js'
-import { defaultDays, stopCost, tripEstimate } from '../services/trip.js'
+import { defaultDays, stopCost, tripEstimate, serializeTrip, parseTripParam } from '../services/trip.js'
 import { fmt } from '../services/hotels.js'
 
 export default function TripPlannerPage() {
-  const { items, remove, move, setDays, clear } = useTrip()
+  const { items, remove, move, setDays, clear, load } = useTrip()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [origin, setOrigin] = useState('TPE')
   const [month, setMonth] = useState(new Date().getMonth() + 1)
   const [copied, setCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
 
   useEffect(() => {
     document.title = '我的行程規劃｜漫遊地球'
     window.scrollTo(0, 0)
   }, [])
+
+  // 分享連結：?plan= 存在時，載入該行程並還原出發地/月份，再清掉網址參數
+  useEffect(() => {
+    const plan = searchParams.get('plan')
+    if (!plan) return
+    const parsed = parseTripParam(plan)
+    if (parsed.length) load(parsed)
+    const from = searchParams.get('from')
+    if (from && ORIGINS.some((o) => o.id === from)) setOrigin(from)
+    const mm = Number(searchParams.get('m'))
+    if (mm >= 1 && mm <= 12) setMonth(mm)
+    setSearchParams({}, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const shareTrip = async () => {
+    const plan = serializeTrip(items)
+    if (!plan) return
+    const url = `${window.location.origin}/trip?plan=${encodeURIComponent(plan)}&from=${origin}&m=${month}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch {
+      // 不支援剪貼簿時略過
+    }
+  }
 
   // 把 trip items 解析成完整的國家/區域資料，過濾掉找不到的
   const stops = useMemo(
@@ -52,7 +81,7 @@ export default function TripPlannerPage() {
     }
   }
 
-  if (stops.length === 0) {
+  if (stops.length === 0 && !searchParams.get('plan')) {
     return (
       <div className="page trip-page">
         <section className="trip-hero">
@@ -176,9 +205,17 @@ export default function TripPlannerPage() {
             <p className="trip-summary-total-value">{fmt(est.total)}</p>
           </div>
 
-          <button className="btn btn-primary trip-copy" onClick={copyItinerary}>
-            {copied ? '✓ 已複製行程' : '📋 複製行程文字'}
-          </button>
+          <div className="trip-share-row">
+            <button className="btn btn-primary trip-copy" onClick={copyItinerary}>
+              {copied ? '✓ 已複製行程' : '📋 複製行程文字'}
+            </button>
+            <button className="btn btn-ghost trip-share" onClick={shareTrip}>
+              {linkCopied ? '✓ 連結已複製' : '🔗 複製分享連結'}
+            </button>
+          </div>
+          <p className="panel-note panel-note-share">
+            🔗 分享連結把你排好的城市、天數與出發設定編進網址，朋友點開就看到同一份行程（會覆蓋他原本的行程）。
+          </p>
           <p className="panel-note">
             💡 估算含第一站來回機票 + 各站住宿（雙人房均分）、餐飲、交通、門票。跨城市交通與第二段以後的機票未計入，僅供行前抓預算參考。
           </p>

@@ -68,8 +68,11 @@ export function TripProvider({ children }) {
 
   const clear = useCallback(() => setItems([]), [])
 
+  // 由分享連結載入整趟行程（取代目前行程）
+  const load = useCallback((arr) => setItems(Array.isArray(arr) ? arr : []), [])
+
   return (
-    <TripContext.Provider value={{ items, add, remove, toggle, has, move, setDays, clear }}>
+    <TripContext.Provider value={{ items, add, remove, toggle, has, move, setDays, clear, load }}>
       {children}
     </TripContext.Provider>
   )

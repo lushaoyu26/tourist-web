@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { GROUPS, FEATURED_IDS, COUNTRY_BY_ID } from '../data/index.js'
 import { useTrip } from '../hooks/useTrip.jsx'
+import { useTheme } from '../hooks/useTheme.jsx'
 
 export default function NavBar() {
   const { pathname } = useLocation()
@@ -9,6 +10,7 @@ export default function NavBar() {
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
   const { items } = useTrip()
+  const { theme, toggle } = useTheme()
 
   // 路由切換或點擊選單外側時收合
   useEffect(() => setOpen(false), [pathname])
@@ -79,6 +81,15 @@ export default function NavBar() {
           <span className="navbar-link-name">我的行程</span>
           {items.length > 0 && <span className="navbar-trip-badge">{items.length}</span>}
         </Link>
+
+        <button
+          className="navbar-theme-btn"
+          onClick={toggle}
+          title={theme === 'dark' ? '切換為亮色模式' : '切換為深色模式'}
+          aria-label="切換亮／暗色主題"
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
       </nav>
     </header>
   )

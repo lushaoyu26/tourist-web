@@ -29,3 +29,28 @@ export function tripEstimate(stops, originId = 'TPE', month = new Date().getMont
   const flight = stops.length ? estimateFlightPrice({ region: stops[0].region, originId, month }) : 0
   return { flight, ground, total: flight + ground, totalDays, count: stops.length }
 }
+
+// ===== 行程分享：把行程編碼進網址，朋友點開連結就看到你排好的行程 =====
+// 格式：每站 countryId~regionId~days，多站以逗號相連。
+// id 皆為 kebab/單字，不含 ~ 或 , ，故可安全分隔。
+const STOP_SEP = ','
+const FIELD_SEP = '~'
+
+export function serializeTrip(items) {
+  return (items || [])
+    .map((it) => [it.countryId, it.regionId, it.days ?? ''].join(FIELD_SEP))
+    .join(STOP_SEP)
+}
+
+export function parseTripParam(str) {
+  if (!str) return []
+  return String(str)
+    .split(STOP_SEP)
+    .map((chunk) => {
+      const [countryId, regionId, days] = chunk.split(FIELD_SEP)
+      if (!countryId || !regionId) return null
+      const d = Number(days)
+      return { countryId, regionId, days: Number.isFinite(d) && d > 0 ? d : null }
+    })
+    .filter(Boolean)
+}

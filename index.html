@@ -14,6 +14,16 @@
     />
   </head>
   <body>
+    <script>
+      // 在 React 載入前就設定主題，避免重新整理時閃一下亮色
+      (function () {
+        try {
+          var saved = localStorage.getItem('wanderglobe-theme');
+          var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
