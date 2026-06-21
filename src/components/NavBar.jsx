@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { GROUPS, FEATURED_IDS, COUNTRY_BY_ID } from '../data/index.js'
 import { useTrip } from '../hooks/useTrip.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLang } from '../hooks/useLang.jsx'
 import CitySearch from './CitySearch.jsx'
 
 export default function NavBar() {
@@ -13,6 +14,7 @@ export default function NavBar() {
   const panelRef = useRef(null)
   const { items } = useTrip()
   const { theme, toggle } = useTheme()
+  const { lang, toggle: toggleLang, t } = useLang()
 
   // 路由切換或點擊選單外側時收合
   useEffect(() => setOpen(false), [pathname])
@@ -56,7 +58,7 @@ export default function NavBar() {
           aria-label="搜尋"
         >
           <span>🔍</span>
-          <span className="navbar-search-hint">搜尋</span>
+          <span className="navbar-search-hint">{t('search')}</span>
           <kbd className="navbar-search-kbd">/</kbd>
         </button>
 
@@ -73,7 +75,7 @@ export default function NavBar() {
 
         <button className={`navbar-link navbar-menu-btn ${open ? 'active' : ''}`} onClick={() => setOpen(!open)}>
           <span>🗺️</span>
-          <span className="navbar-link-name">全部目的地</span>
+          <span className="navbar-link-name">{t('allDest')}</span>
           <span className={`navbar-caret ${open ? 'up' : ''}`}>▾</span>
         </button>
 
@@ -104,14 +106,23 @@ export default function NavBar() {
           className={`navbar-link navbar-trip ${pathname === '/trip' ? 'active' : ''}`}
         >
           <span>🧳</span>
-          <span className="navbar-link-name">我的行程</span>
+          <span className="navbar-link-name">{t('myTrip')}</span>
           {items.length > 0 && <span className="navbar-trip-badge">{items.length}</span>}
         </Link>
 
         <button
+          className="navbar-lang-btn"
+          onClick={toggleLang}
+          title={lang === 'en' ? '切換為中文' : 'Switch to English'}
+          aria-label="切換介面語言 / Switch language"
+        >
+          {lang === 'en' ? '中' : 'EN'}
+        </button>
+
+        <button
           className="navbar-theme-btn"
           onClick={toggle}
-          title={theme === 'dark' ? '切換為亮色模式' : '切換為深色模式'}
+          title={theme === 'dark' ? t('toLight') : t('toDark')}
           aria-label="切換亮／暗色主題"
         >
           {theme === 'dark' ? '☀️' : '🌙'}

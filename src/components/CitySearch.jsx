@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { COUNTRIES } from '../data/index.js'
+import { useLang } from '../hooks/useLang.jsx'
 
 // 全站搜尋索引（建立一次）：所有國家 + 所有城市區域，支援中英文模糊比對。
 const INDEX = (() => {
@@ -49,6 +50,7 @@ export default function CitySearch({ open, onClose }) {
   const [active, setActive] = useState(0)
   const inputRef = useRef(null)
   const navigate = useNavigate()
+  const { t } = useLang()
 
   useEffect(() => {
     if (open) {
@@ -101,15 +103,15 @@ export default function CitySearch({ open, onClose }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder={`搜尋城市或國家…（全站 ${CITY_COUNT} 個城市）`}
-            aria-label="搜尋城市或國家"
+            placeholder={t('searchPlaceholder', CITY_COUNT)}
+            aria-label="搜尋城市或國家 / Search"
           />
           <kbd className="search-kbd">Esc</kbd>
         </div>
 
         <div className="search-results">
-          {!q && <div className="search-hint">輸入城市或國家名稱（中英文皆可），例如「京都」「Kyoto」「冰島」。</div>}
-          {q && results.length === 0 && <div className="search-empty">找不到符合「{q}」的目的地</div>}
+          {!q && <div className="search-hint">{t('searchHint')}</div>}
+          {q && results.length === 0 && <div className="search-empty">{t('searchEmpty', q)}</div>}
           {results.map((r, i) => (
             <button
               key={r.path}

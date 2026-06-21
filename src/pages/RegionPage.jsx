@@ -7,6 +7,7 @@ import HotelPanel from '../components/HotelPanel.jsx'
 import BudgetEstimator from '../components/BudgetEstimator.jsx'
 import PhotoWall from '../components/PhotoWall.jsx'
 import BestMonths from '../components/BestMonths.jsx'
+import WeatherWidget from '../components/WeatherWidget.jsx'
 import { getRegion, getRandomRegionPath } from '../data/index.js'
 import { useTrip } from '../hooks/useTrip.jsx'
 import { defaultDays } from '../services/trip.js'
@@ -82,7 +83,10 @@ export default function RegionPage() {
         </div>
       )}
 
-      <BestMonths region={region} />
+      <div className="region-insight">
+        <BestMonths region={region} />
+        <WeatherWidget region={region} />
+      </div>
 
       <nav className="section-nav">
         {SECTIONS.map((s) => (
