@@ -2619,3 +2619,133 @@ img {
   transition: color 0.15s, border-color 0.15s;
 }
 .plan-del:hover { color: #ef476f; border-color: #ef476f; }
+
+/* ============ 行程匯出（日曆 / 列印） ============ */
+.trip-export {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.trip-export-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.trip-export-date input {
+  font-family: inherit;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+}
+.trip-export-btns { display: flex; gap: 8px; }
+.trip-export-btns .btn { flex: 1; padding: 9px; font-size: 0.85rem; border: 1.5px solid var(--line); color: var(--ink-soft); }
+.trip-export-btns .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ============ 旅伴分帳 ============ */
+.billsplit {
+  max-width: 1100px;
+  margin: 26px auto 0;
+  padding: 22px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.billsplit-head h2 { font-size: 1.3rem; font-weight: 800; color: var(--ink); }
+.billsplit-head p { color: var(--ink-soft); font-size: 0.9rem; margin: 4px 0 16px; }
+.billsplit-rows { display: flex; flex-direction: column; gap: 8px; max-width: 520px; }
+.billsplit-row { display: flex; align-items: center; gap: 8px; }
+.billsplit-name {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.billsplit-amount {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink-faint);
+}
+.billsplit-amount input {
+  width: 110px;
+  border: none;
+  outline: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 9px 0;
+  color: var(--ink);
+  text-align: right;
+}
+.billsplit-del {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  color: var(--ink-faint);
+}
+.billsplit-del:hover:not(:disabled) { color: #ef476f; border-color: #ef476f; }
+.billsplit-del:disabled { opacity: 0.35; cursor: not-allowed; }
+.billsplit-add {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px dashed var(--line);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.billsplit-add:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.billsplit-summary {
+  display: flex;
+  gap: 28px;
+  margin: 18px 0 6px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.billsplit-stat { display: flex; flex-direction: column; }
+.billsplit-stat span { font-size: 0.82rem; color: var(--ink-soft); }
+.billsplit-stat strong { font-size: 1.35rem; font-weight: 800; color: var(--ink); }
+.billsplit-result h3 { font-size: 1rem; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+.billsplit-empty, .billsplit-even { color: var(--ink-soft); font-size: 0.9rem; }
+.billsplit-tx { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.billsplit-tx li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.billsplit-tx strong { color: var(--ink); }
+.billsplit-tx-amt { margin-left: auto; font-weight: 800; color: var(--accent); }
+
+/* ============ 列印 / 存成 PDF ============ */
+@media print {
+  .navbar, .trip-summary-controls, .trip-share-row, .trip-export, .panel-note,
+  .trip-stop-actions, .trip-add-more, .plan-compare, .billsplit, .trip-stop-media,
+  .region-footer-nav { display: none !important; }
+  body, .page { background: #fff !important; color: #000 !important; }
+  .trip-layout { display: block !important; }
+  .trip-stop { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; }
+  .trip-summary { box-shadow: none !important; border: 1px solid #ddd !important; margin-top: 16px; }
+  .trip-summary-total-value { color: #000 !important; }
+  a { color: #000 !important; }
+}

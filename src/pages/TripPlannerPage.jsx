@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import WikiImage from '../components/WikiImage.jsx'
+import BillSplit from '../components/BillSplit.jsx'
 import { useTrip } from '../hooks/useTrip.jsx'
 import { useSavedPlans } from '../hooks/useSavedPlans.js'
 import { getRegion } from '../data/index.js'
 import { ORIGINS, MONTHS } from '../services/flights.js'
-import { defaultDays, stopCost, tripEstimate, serializeTrip, parseTripParam } from '../services/trip.js'
+import { defaultDays, stopCost, tripEstimate, serializeTrip, parseTripParam, buildICS } from '../services/trip.js'
 import { fmt } from '../services/hotels.js'
+
+const todayStr = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 // 把一組行程 items 解析成估算資料（給方案比較用）
 function resolvePlan(items, origin, month) {
@@ -28,6 +34,7 @@ export default function TripPlannerPage() {
   const [month, setMonth] = useState(new Date().getMonth() + 1)
   const [copied, setCopied] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
+  const [startDate, setStartDate] = useState(todayStr)
 
   useEffect(() => {
     document.title = '我的行程規劃｜漫遊地球'
@@ -92,6 +99,22 @@ export default function TripPlannerPage() {
     if (name === null) return // 取消
     savePlan(name || def, stops.map((s) => ({ countryId: s.countryId, regionId: s.regionId, days: s.days })))
   }
+
+  const exportICS = () => {
+    if (!stops.length) return
+    const ics = buildICS(stops, startDate)
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = '漫遊地球行程.ics'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
+  const printTrip = () => window.print()
 
   const copyItinerary = async () => {
     const lines = stops.map(
@@ -247,6 +270,17 @@ export default function TripPlannerPage() {
               💾 存成方案比較
             </button>
           </div>
+
+          <div className="trip-export">
+            <label className="trip-export-date">
+              <span>出發日期</span>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </label>
+            <div className="trip-export-btns">
+              <button className="btn btn-ghost" onClick={exportICS}>📅 匯出行事曆</button>
+              <button className="btn btn-ghost" onClick={printTrip}>🖨️ 列印 / 存 PDF</button>
+            </div>
+          </div>
           <p className="panel-note panel-note-share">
             🔗 分享連結把你排好的城市、天數與出發設定編進網址，朋友點開就看到同一份行程（會覆蓋他原本的行程）。
           </p>
@@ -290,6 +324,8 @@ export default function TripPlannerPage() {
           <p className="panel-note">💾 在右側「存成方案比較」可把目前行程加入比較；切換上方出發地／月份，所有方案會以同基準即時重算。</p>
         </section>
       )}
+
+      <BillSplit suggested={est.total} />
     </div>
   )
 }

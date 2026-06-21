@@ -54,3 +54,40 @@ export function parseTripParam(str) {
     })
     .filter(Boolean)
 }
+
+// ===== 行程匯出：產生 iCalendar(.ics)，每一站是一段跨日的全天事件，依序串接 =====
+const pad2 = (n) => String(n).padStart(2, '0')
+const icsDate = (d) => `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}`
+const icsEsc = (s) => String(s).replace(/[\\;,]/g, (m) => '\\' + m).replace(/\n/g, '\\n')
+
+export function buildICS(stops, startDateStr) {
+  let cursor = new Date(`${startDateStr}T00:00:00`)
+  if (isNaN(cursor.getTime())) cursor = new Date()
+  const stamp = icsDate(new Date()) + 'T000000Z'
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//WanderGlobe//Trip//ZH-Hant',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:漫遊地球行程',
+  ]
+  stops.forEach((s, i) => {
+    const start = new Date(cursor)
+    const end = new Date(cursor)
+    end.setDate(end.getDate() + Math.max(1, s.days))
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:wanderglobe-${i}-${s.countryId}-${s.regionId}@wanderglobe.app`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${icsDate(start)}`,
+      `DTEND;VALUE=DATE:${icsDate(end)}`,
+      `SUMMARY:${icsEsc(`${s.country.flag} ${s.region.name}（${s.days} 天）`)}`,
+      `DESCRIPTION:${icsEsc(`第 ${i + 1} 站 · ${s.region.en || ''}${s.region.tagline ? ' — ' + s.region.tagline : ''}`)}`,
+      'END:VEVENT'
+    )
+    cursor = end
+  })
+  lines.push('END:VCALENDAR')
+  return lines.join('\r\n')
+}
