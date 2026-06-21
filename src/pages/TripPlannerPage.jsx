@@ -2,13 +2,27 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import WikiImage from '../components/WikiImage.jsx'
 import { useTrip } from '../hooks/useTrip.jsx'
+import { useSavedPlans } from '../hooks/useSavedPlans.js'
 import { getRegion } from '../data/index.js'
 import { ORIGINS, MONTHS } from '../services/flights.js'
 import { defaultDays, stopCost, tripEstimate, serializeTrip, parseTripParam } from '../services/trip.js'
 import { fmt } from '../services/hotels.js'
 
+// 把一組行程 items 解析成估算資料（給方案比較用）
+function resolvePlan(items, origin, month) {
+  const stops = items
+    .map((it) => {
+      const { country, region } = getRegion(it.countryId, it.regionId)
+      if (!country || !region) return null
+      return { ...it, country, region, days: it.days ?? defaultDays(region) }
+    })
+    .filter(Boolean)
+  return { stops, est: tripEstimate(stops, origin, month) }
+}
+
 export default function TripPlannerPage() {
   const { items, remove, move, setDays, clear, load } = useTrip()
+  const { plans, save: savePlan, remove: removePlan } = useSavedPlans()
   const [searchParams, setSearchParams] = useSearchParams()
   const [origin, setOrigin] = useState('TPE')
   const [month, setMonth] = useState(new Date().getMonth() + 1)
@@ -61,6 +75,23 @@ export default function TripPlannerPage() {
   )
 
   const est = useMemo(() => tripEstimate(stops, origin, month), [stops, origin, month])
+
+  // 方案比較：把每個已存方案以「目前的出發地/月份」重新估算，方便同基準並排比成本
+  const comparison = useMemo(
+    () => plans.map((p) => ({ ...p, ...resolvePlan(p.items, origin, month) })),
+    [plans, origin, month]
+  )
+  const cheapest = comparison.length
+    ? comparison.reduce((m, p) => (p.est.total < m.est.total ? p : m), comparison[0])
+    : null
+
+  const saveCurrentPlan = () => {
+    if (!stops.length) return
+    const def = `方案 ${plans.length + 1}（${stops.length} 站）`
+    const name = window.prompt('幫這個行程方案取個名字：', def)
+    if (name === null) return // 取消
+    savePlan(name || def, stops.map((s) => ({ countryId: s.countryId, regionId: s.regionId, days: s.days })))
+  }
 
   const copyItinerary = async () => {
     const lines = stops.map(
@@ -212,6 +243,9 @@ export default function TripPlannerPage() {
             <button className="btn btn-ghost trip-share" onClick={shareTrip}>
               {linkCopied ? '✓ 連結已複製' : '🔗 複製分享連結'}
             </button>
+            <button className="btn btn-ghost trip-save-plan" onClick={saveCurrentPlan}>
+              💾 存成方案比較
+            </button>
           </div>
           <p className="panel-note panel-note-share">
             🔗 分享連結把你排好的城市、天數與出發設定編進網址，朋友點開就看到同一份行程（會覆蓋他原本的行程）。
@@ -221,6 +255,41 @@ export default function TripPlannerPage() {
           </p>
         </aside>
       </div>
+
+      {comparison.length > 0 && (
+        <section className="plan-compare">
+          <div className="plan-compare-head">
+            <h2>📊 方案比較</h2>
+            <p>以同一個出發地（{ORIGINS.find((o) => o.id === origin)?.city}）與 {month} 月估算，並排比較你存下的行程方案。</p>
+          </div>
+          <div className="plan-compare-grid">
+            {comparison.map((p) => (
+              <div key={p.id} className={`plan-card ${p.id === cheapest?.id && comparison.length > 1 ? 'plan-cheapest' : ''}`}>
+                {p.id === cheapest?.id && comparison.length > 1 && <span className="plan-badge">最省</span>}
+                <h3 className="plan-card-name">{p.name}</h3>
+                <div className="plan-card-cities">
+                  {p.stops.map((s) => (
+                    <span key={`${s.countryId}-${s.regionId}`} className="plan-chip">
+                      {s.country.flag} {s.region.name}
+                      <em>{s.days}天</em>
+                    </span>
+                  ))}
+                  {p.stops.length === 0 && <span className="plan-chip plan-chip-empty">（城市資料已更新，無法解析）</span>}
+                </div>
+                <div className="plan-card-stats">
+                  <span>{p.stops.length} 站 · {p.est.totalDays} 天</span>
+                  <strong>{fmt(p.est.total)}</strong>
+                </div>
+                <div className="plan-card-actions">
+                  <button className="btn btn-ghost" onClick={() => load(p.items)}>載入此方案</button>
+                  <button className="plan-del" title="刪除方案" onClick={() => removePlan(p.id)}>✕</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="panel-note">💾 在右側「存成方案比較」可把目前行程加入比較；切換上方出發地／月份，所有方案會以同基準即時重算。</p>
+        </section>
+      )}
     </div>
   )
 }

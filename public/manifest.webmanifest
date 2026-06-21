@@ -1,0 +1,20 @@
+{
+  "name": "漫遊地球 WanderGlobe",
+  "short_name": "漫遊地球",
+  "description": "互動式 3D 地球旅遊攻略：機票、住宿、景點、美食與預算估算",
+  "lang": "zh-Hant",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070b18",
+  "theme_color": "#0c1733",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

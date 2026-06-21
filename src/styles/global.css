@@ -2394,3 +2394,228 @@ img {
 .panel-note-share {
   color: var(--ink-faint);
 }
+
+/* ============ 城市搜尋 ============ */
+.navbar-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.navbar-search-btn:hover {
+  border-color: var(--accent);
+  background: rgba(20, 184, 166, 0.1);
+  transform: translateY(-1px);
+}
+.navbar-search-hint { font-weight: 600; }
+.navbar-search-kbd {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink-faint) 12%, transparent);
+  color: var(--ink-faint);
+}
+.navbar-dark .navbar-search-btn {
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #eef2ff;
+}
+.navbar-dark .navbar-search-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.navbar-dark .navbar-search-kbd {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #cfd6f0;
+}
+
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(8, 13, 30, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 16px 16px;
+  animation: fade 0.15s ease both;
+}
+.search-box {
+  width: min(620px, 100%);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: rise 0.2s ease both;
+}
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.search-ico { font-size: 1.15rem; }
+.search-input-row input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  font-family: inherit;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.search-input-row input::placeholder { color: var(--ink-faint); }
+.search-kbd {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  color: var(--ink-faint);
+}
+.search-results {
+  max-height: 56vh;
+  overflow-y: auto;
+  padding: 6px;
+}
+.search-hint,
+.search-empty {
+  padding: 22px 16px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background 0.12s;
+}
+.search-item.active,
+.search-item:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.search-item-icon { font-size: 1.3rem; width: 1.6rem; text-align: center; }
+.search-item-main { flex: 1; display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.search-item-main strong { font-weight: 700; color: var(--ink); }
+.search-item-en { font-size: 0.82rem; color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-item-sub { font-size: 0.8rem; color: var(--ink-soft); white-space: nowrap; }
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 720px) {
+  .navbar-search-hint, .navbar-search-kbd { display: none; }
+  .navbar-search-btn { padding: 8px 11px; }
+}
+
+/* ============ 行程方案比較 ============ */
+.trip-save-plan { width: 100%; }
+.plan-compare {
+  max-width: 1100px;
+  margin: 26px auto 0;
+  padding: 0 4px;
+}
+.plan-compare-head h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.plan-compare-head p {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  margin: 4px 0 14px;
+}
+.plan-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.plan-card.plan-cheapest {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+}
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--accent);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.plan-card-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.plan-card-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.plan-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-faint) 12%, transparent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.plan-chip em { font-style: normal; font-weight: 800; color: var(--accent); }
+.plan-chip-empty { color: var(--ink-faint); }
+.plan-card-stats {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.plan-card-stats span { font-size: 0.85rem; color: var(--ink-soft); }
+.plan-card-stats strong { font-size: 1.25rem; font-weight: 800; color: var(--ink); }
+.plan-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plan-card-actions .btn { flex: 1; padding: 8px; font-size: 0.85rem; }
+.plan-del {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  color: var(--ink-faint);
+  font-weight: 700;
+  transition: color 0.15s, border-color 0.15s;
+}
+.plan-del:hover { color: #ef476f; border-color: #ef476f; }

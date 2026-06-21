@@ -3,11 +3,13 @@ import { Link, useLocation } from 'react-router-dom'
 import { GROUPS, FEATURED_IDS, COUNTRY_BY_ID } from '../data/index.js'
 import { useTrip } from '../hooks/useTrip.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
+import CitySearch from './CitySearch.jsx'
 
 export default function NavBar() {
   const { pathname } = useLocation()
   const onHome = pathname === '/'
   const [open, setOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const panelRef = useRef(null)
   const { items } = useTrip()
   const { theme, toggle } = useTheme()
@@ -22,6 +24,19 @@ export default function NavBar() {
     return () => document.removeEventListener('mousedown', onClick)
   }, [open])
 
+  // 全域鍵盤捷徑：按「/」或 Cmd/Ctrl+K 開啟搜尋
+  useEffect(() => {
+    const onKey = (e) => {
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable
+      if ((e.key === '/' && !typing) || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   const featured = FEATURED_IDS.slice(0, 4).map((id) => COUNTRY_BY_ID[id])
 
   return (
@@ -34,6 +49,17 @@ export default function NavBar() {
       </Link>
 
       <nav className="navbar-links" ref={panelRef}>
+        <button
+          className="navbar-search-btn"
+          onClick={() => setSearchOpen(true)}
+          title="搜尋城市或國家（快捷鍵 /）"
+          aria-label="搜尋"
+        >
+          <span>🔍</span>
+          <span className="navbar-search-hint">搜尋</span>
+          <kbd className="navbar-search-kbd">/</kbd>
+        </button>
+
         {featured.map((c) => (
           <Link
             key={c.id}
@@ -91,6 +117,8 @@ export default function NavBar() {
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
       </nav>
+
+      <CitySearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   )
 }
