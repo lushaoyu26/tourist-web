@@ -1,12 +1,47 @@
-import { getHotelTiers, bookingUrl, agodaUrl, airbnbUrl, fmtRange } from '../services/hotels.js'
+import { useEffect, useState } from 'react'
+import { getHotelTiers, bookingUrl, agodaUrl, airbnbUrl, fmtRange, fmt } from '../services/hotels.js'
+import { fetchRealHotels } from '../services/hotelsApi.js'
 
-// 住宿行情面板：三種等級的每晚行情區間 + 推薦住宿區 + 訂房平台即時查價連結。
+// 住宿行情面板：三種等級的每晚行情區間（示範）+ 即時房價（有設定 API 金鑰時）+ 訂房平台連結。
 
 export default function HotelPanel({ region }) {
   const tiers = getHotelTiers(region)
+  const [real, setReal] = useState(null)
+
+  useEffect(() => {
+    let alive = true
+    setReal(null)
+    fetchRealHotels({ region }).then((r) => alive && setReal(r))
+    return () => {
+      alive = false
+    }
+  }, [region.id])
+
+  const liveHotels = real?.hotels?.length ? real.hotels : null
 
   return (
     <div className="hotel-panel">
+      {liveHotels && (
+        <div className="hotel-live">
+          <div className="price-source">
+            <span className="price-source-live">🟢 即時房價 · 來源 {real.source === 'amadeus' ? 'Amadeus' : 'Hotellook'}（每晚起）</span>
+          </div>
+          <div className="hotel-live-list">
+            {liveHotels.map((h, i) => (
+              <div key={i} className="hotel-live-row">
+                <span className="hotel-live-name">
+                  {h.stars ? '⭐'.repeat(Math.min(5, Math.round(h.stars))) + ' ' : ''}
+                  {h.name}
+                </span>
+                <strong className="hotel-live-price">
+                  {!h.currency || h.currency === 'TWD' ? fmt(h.price) : `${h.currency} ${h.price.toLocaleString('en-US')}`}
+                </strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="hotel-tiers">
         {tiers.map((tier) => (
           <div key={tier.id} className={`hotel-tier hotel-tier-${tier.id}`}>

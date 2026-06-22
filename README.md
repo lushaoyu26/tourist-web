@@ -100,12 +100,30 @@ scripts/       # 開發輔助（頁面截圖、資料結構驗證）
 npx vercel --prod   # 第一次會引導登入，跟著按 Enter 即可
 ```
 
-## 🔌 接真實 API
+## 🔌 接真實機票／住宿價格（選用，已內建）
 
-航班與住宿目前為**示範估價**（依市場行情 + 淡旺季係數模擬，數值穩定可重現），要接真實資料：
+航班與住宿預設為**示範估價**（依市場行情 + 淡旺季係數模擬，數值穩定可重現）。本專案**已內建真實價格串接**——只要在 Vercel 設定免費 API 金鑰即可自動啟用，沒設定時照常用示範估價（不影響運作）。
 
-- **機票**：修改 [src/services/flights.js](src/services/flights.js) 的 `getFlightOptions()`，可接 Skyscanner（RapidAPI）、Amadeus 或 Kiwi Tequila
-- **住宿**：修改 [src/services/hotels.js](src/services/hotels.js)，可接 Booking.com Affiliate API
+> ⚠️ **為什麼不爬蟲？** Skyscanner / Booking / Agoda / Airbnb / Trip.com / 多數台灣 OTA 的服務條款都禁止自動擷取（Booking、Ryanair 等曾對爬蟲提告），且技術上被嚴格封鎖、資料脆弱。它們提供**官方 Affiliate／合作 API**，用官方管道才是合法、穩定、還能賺分潤的做法。
+
+**架構**：金鑰放在 Vercel Serverless Functions（[api/flights.js](api/flights.js)、[api/hotels.js](api/hotels.js)）的伺服器端環境變數，**不外洩、不踩 CORS**；前端（[src/services/flightsApi.js](src/services/flightsApi.js)、[src/services/hotelsApi.js](src/services/hotelsApi.js)）呼叫這兩個端點，拿到即時報價就顯示「🟢 即時票價／房價」，否則優雅回退示範估價。Provider 邏輯在 [api/_providers.js](api/_providers.js)，支援兩家、可用環境變數切換：
+
+| Provider | 提供 | 申請 |
+| --- | --- | --- |
+| **Travelpayouts** | 機票即時價（Aviasales）+ 飯店價（Hotellook）+ Booking/Agoda/Trip 分潤連結 | [travelpayouts.com](https://www.travelpayouts.com/) |
+| **Amadeus Self-Service** | 官方免費 tier，真實機票 + 飯店 offer | [developers.amadeus.com](https://developers.amadeus.com/) |
+
+**啟用方式**：在 Vercel → Settings → Environment Variables 設定（見 [.env.example](.env.example)）：
+
+```
+PRICE_PROVIDER=travelpayouts          # 或 amadeus
+TRAVELPAYOUTS_TOKEN=你的token          # Travelpayouts 路線
+# 或
+AMADEUS_CLIENT_ID=...                  # Amadeus 路線
+AMADEUS_CLIENT_SECRET=...
+```
+
+> 本機 `npm run dev` 不會跑 serverless functions，所以本機一律顯示示範估價；部署到 Vercel 後、設好金鑰才會切換成即時資料。Airbnb 已關閉新夥伴 API（僅邀請制），故住宿維持深連結到搜尋頁。
 
 ## ➕ 新增國家／區域
 
