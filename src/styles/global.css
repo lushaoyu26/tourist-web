@@ -2903,3 +2903,110 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .hotel-live-row:last-child { border-bottom: none; }
 .hotel-live-name { font-size: 0.9rem; color: var(--ink); }
 .hotel-live-price { font-size: 1rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
+
+/* ============ 廣告版位 ============ */
+.ad-wrap { max-width: 1100px; margin: 0 auto; padding: 8px 16px; }
+.ad-wrap-inline { margin-bottom: 18px; }
+.ad-slot {
+  display: block;
+  width: 100%;
+  position: relative;
+}
+.ad-slot-tag {
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ad-slot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 110px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--ink-faint) 5%, transparent);
+  text-align: center;
+}
+.ad-slot-placeholder .ad-slot-tag { margin-bottom: 6px; }
+.ad-slot-hint { font-size: 0.82rem; color: var(--ink-faint); }
+
+/* ============ 旅人評論社群 ============ */
+.reviews-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.reviews-avg {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+.rv-stars { color: #f5b507; letter-spacing: 2px; }
+.reviews-count { font-size: 0.85rem; color: var(--ink-soft); margin-top: 2px; }
+.reviews-empty { color: var(--ink-soft); }
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 22px;
+}
+.review-form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.review-nick {
+  flex: 1;
+  min-width: 160px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.review-rating { display: inline-flex; gap: 2px; }
+.review-star { font-size: 1.5rem; color: var(--line); line-height: 1; transition: color 0.12s, transform 0.12s; }
+.review-star.on { color: #f5b507; }
+.review-star:hover { transform: scale(1.15); }
+.review-text, .review-photo {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  resize: vertical;
+}
+.review-text::placeholder, .review-photo::placeholder, .review-nick::placeholder { color: var(--ink-faint); }
+.review-submit { align-self: flex-start; }
+
+.review-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.review-item {
+  padding: 16px 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.review-item-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.review-item-nick { color: var(--ink); }
+.review-item-date { font-size: 0.78rem; color: var(--ink-faint); margin-left: auto; }
+.review-item-text { margin-top: 8px; color: var(--ink-soft); line-height: 1.7; white-space: pre-wrap; }
+.review-item-photo {
+  margin-top: 12px;
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+.reviews-loading { color: var(--ink-faint); padding: 12px 0; }

@@ -8,6 +8,8 @@ import BudgetEstimator from '../components/BudgetEstimator.jsx'
 import PhotoWall from '../components/PhotoWall.jsx'
 import BestMonths from '../components/BestMonths.jsx'
 import WeatherWidget from '../components/WeatherWidget.jsx'
+import Reviews from '../components/Reviews.jsx'
+import AdSlot from '../components/AdSlot.jsx'
 import { getRegion, getRandomRegionPath } from '../data/index.js'
 import { useTrip } from '../hooks/useTrip.jsx'
 import { defaultDays } from '../services/trip.js'
@@ -20,6 +22,7 @@ const SECTIONS = [
   { id: 'itinerary', icon: '📋', label: '行程攻略' },
   { id: 'budget', icon: '💰', label: '預算估算' },
   { id: 'photos', icon: '📸', label: '照片牆' },
+  { id: 'reviews', icon: '💬', label: '旅人評論' },
 ]
 
 export default function RegionPage() {
@@ -173,6 +176,12 @@ export default function RegionPage() {
         </h2>
         <PhotoWall region={region} />
       </section>
+
+      <div className="section ad-wrap">
+        <AdSlot slot="region-mid" label="贊助" />
+      </div>
+
+      <Reviews countryId={countryId} regionId={regionId} regionName={region.name} />
 
       <div className="region-footer-nav">
         <Link to={`/country/${country.id}`} className="btn btn-ghost">

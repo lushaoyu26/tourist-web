@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import WikiImage from '../components/WikiImage.jsx'
+import AdSlot from '../components/AdSlot.jsx'
 import { GROUPS, COUNTRIES } from '../data/index.js'
 
 export default function DestinationsPage() {
@@ -21,8 +22,17 @@ export default function DestinationsPage() {
         </p>
       </section>
 
-      {GROUPS.map((group) => (
+      <div className="section ad-wrap">
+        <AdSlot slot="destinations-top" label="贊助" />
+      </div>
+
+      {GROUPS.map((group, gi) => (
         <section key={group.id} className="section">
+          {gi === 3 && (
+            <div className="ad-wrap ad-wrap-inline">
+              <AdSlot slot="destinations-mid" label="贊助" />
+            </div>
+          )}
           <h2 className="section-title">
             <span className="section-title-icon">{group.emoji}</span>
             {group.name}
