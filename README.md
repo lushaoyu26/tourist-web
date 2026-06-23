@@ -25,6 +25,7 @@
 - **♿ 無障礙**：略過連結（skip-link）、鍵盤焦點環（`:focus-visible`）、語意化 `<main>` 地標、`prefers-reduced-motion` 降低動態、表單與按鈕 aria 標籤。
 - **💬 旅人評論與照片社群**：每個城市頁可留下星等評論、心得與照片，並看到平均評分。預設存在本機；在 Vercel 連接免費 KV 資料庫後，自動變成**所有訪客共享的社群**（後端 [api/reviews.js](api/reviews.js) + 前端優雅回退）。
 - **📢 廣告版位**：城市頁與目的地頁內建 Google AdSense 就緒的廣告版位（[src/components/AdSlot.jsx](src/components/AdSlot.jsx)）——設定 `VITE_ADSENSE_CLIENT` 後自動顯示廣告，未設定時顯示乾淨的版位佔位。
+- **🎟️ 在地優惠券**：每個城市頁有「在地優惠」區，列出訂房、體驗、上網卡等合作夥伴折扣，一鍵複製代碼並前往合作平台（連結自動帶入該城市關鍵字，在東京頁就搜東京）。預設為示範優惠券、連到合作夥伴官方優惠頁；在 Vercel 連接 KV 後，可用後台金鑰（`COUPONS_ADMIN_TOKEN`）經 [api/coupons.js](api/coupons.js) 管理「站方即時優惠」，支援全站／指定國家／指定城市的適用範圍。
 - **🎲 隨機探索**：城市太多選擇困難？首頁與每個城市頁底部都有「隨機探索」按鈕，在 1016 個城市裡隨機跳到一個驚喜目的地。
 
 - **怎麼去**：選出發地（台北/高雄/香港/新加坡/首爾）與月份 → 航班估價，附 Skyscanner / Google Flights 即時查價連結

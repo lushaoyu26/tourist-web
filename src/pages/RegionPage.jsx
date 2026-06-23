@@ -9,6 +9,7 @@ import PhotoWall from '../components/PhotoWall.jsx'
 import BestMonths from '../components/BestMonths.jsx'
 import WeatherWidget from '../components/WeatherWidget.jsx'
 import Reviews from '../components/Reviews.jsx'
+import CouponWall from '../components/CouponWall.jsx'
 import AdSlot from '../components/AdSlot.jsx'
 import { getRegion, getRandomRegionPath } from '../data/index.js'
 import { useTrip } from '../hooks/useTrip.jsx'
@@ -22,6 +23,7 @@ const SECTIONS = [
   { id: 'itinerary', icon: '📋', label: '行程攻略' },
   { id: 'budget', icon: '💰', label: '預算估算' },
   { id: 'photos', icon: '📸', label: '照片牆' },
+  { id: 'coupons', icon: '🎟️', label: '在地優惠' },
   { id: 'reviews', icon: '💬', label: '旅人評論' },
 ]
 
@@ -175,6 +177,14 @@ export default function RegionPage() {
           <span className="section-title-icon">📸</span>照片牆
         </h2>
         <PhotoWall region={region} />
+      </section>
+
+      <section id="coupons" className="section">
+        <h2 className="section-title">
+          <span className="section-title-icon">🎟️</span>{region.name}在地優惠
+          <span className="section-title-sub">訂房、體驗、上網卡折扣，一鍵複製代碼前往合作平台</span>
+        </h2>
+        <CouponWall country={country} region={region} />
       </section>
 
       <div className="section ad-wrap">

@@ -3010,3 +3010,115 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   border-radius: var(--radius-sm);
 }
 .reviews-loading { color: var(--ink-faint); padding: 12px 0; }
+
+/* ============ 在地優惠券 ============ */
+.coupon-wall { display: flex; flex-direction: column; gap: 16px; }
+.coupon-wall-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.coupon-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.coupon-badge-live { color: #047857; background: color-mix(in srgb, #10b981 16%, transparent); }
+.coupon-badge-demo { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.coupon-wall-note { font-size: 0.82rem; color: var(--ink-soft); }
+
+.coupon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.coupon-card {
+  display: flex;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.coupon-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.coupon-card-left {
+  position: relative;
+  flex: 0 0 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 8px;
+  text-align: center;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 16%, transparent), color-mix(in srgb, var(--accent) 4%, transparent));
+  border-right: 2px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+}
+/* 票券缺口（上下兩個圓孔） */
+.coupon-card-left::before,
+.coupon-card-left::after {
+  content: '';
+  position: absolute;
+  right: -7px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+.coupon-card-left::before { top: -6px; }
+.coupon-card-left::after { bottom: -6px; }
+.coupon-card-emoji { font-size: 1.5rem; line-height: 1; }
+.coupon-discount {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1.2;
+}
+.coupon-card-body { flex: 1; min-width: 0; padding: 13px 15px; display: flex; flex-direction: column; gap: 5px; }
+.coupon-card-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.coupon-title { color: var(--ink); font-size: 0.98rem; line-height: 1.35; }
+.coupon-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ink-faint) 12%, transparent);
+  white-space: nowrap;
+}
+.coupon-partner { font-size: 0.8rem; font-weight: 600; color: var(--ink-soft); }
+.coupon-desc { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.55; }
+.coupon-expires { font-size: 0.76rem; color: #c2410c; }
+
+.coupon-actions { margin-top: auto; padding-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.coupon-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px 6px 10px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+button.coupon-code { color: inherit; }
+.coupon-code-label { font-size: 0.66rem; color: var(--ink-faint); letter-spacing: 0.05em; }
+.coupon-code-value { font-weight: 800; color: var(--ink); letter-spacing: 0.04em; }
+.coupon-code-copy { font-size: 0.72rem; font-weight: 700; color: var(--accent); }
+.coupon-code.copied { border-style: solid; background: color-mix(in srgb, #10b981 12%, transparent); }
+.coupon-code.copied .coupon-code-copy { color: #047857; }
+.coupon-code-auto { cursor: default; border-style: solid; }
+.coupon-code-auto .coupon-code-value { font-weight: 600; color: var(--ink-soft); }
+.coupon-go { margin-left: auto; padding: 8px 14px; font-size: 0.84rem; white-space: nowrap; }
+.coupon-disclaimer { font-size: 0.76rem; color: var(--ink-faint); line-height: 1.6; }
+
+@media (max-width: 540px) {
+  .coupon-grid { grid-template-columns: 1fr; }
+  .coupon-go { margin-left: 0; }
+}
