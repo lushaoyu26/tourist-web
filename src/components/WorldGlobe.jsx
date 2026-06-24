@@ -33,8 +33,9 @@ const NORD = {
 
 // react-globe.gl 球半徑 100；國旗殼層略高於球面
 const GLOBE_R = 100
-const FLAG_LO = GLOBE_R * 1.005
-const FLAG_HI = GLOBE_R * 1.006
+// 國旗殼層略高於多邊形（搭配材質 polygonOffset 一起避免 z-fighting 閃爍）
+const FLAG_LO = GLOBE_R * 1.007
+const FLAG_HI = GLOBE_R * 1.008
 const HOVER_ALT = 0.06 // 懸停浮起高度
 const HOVER_SCALE = 1.06 // 懸停時國旗向外抬升（與多邊形浮起同步）
 
@@ -182,6 +183,9 @@ export default function WorldGlobe() {
           opacity,
           side: DoubleSide,
           depthWrite: false,
+          polygonOffset: true,
+          polygonOffsetFactor: -4,
+          polygonOffsetUnits: -4,
         })
         const mesh = new Mesh(geo, mat)
         mesh.raycast = () => {} // 點擊穿透，交給底下的國家多邊形
