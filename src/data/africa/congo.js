@@ -9,7 +9,7 @@ export default {
   description:
     '別與東邊的鄰國搞混——這是剛果共和國，首都布拉薩市隔著浩瀚剛果河與金夏沙相望。奧扎拉-科庫阿國家公園的雨林沼澤是西部低地大猩猩的最後堡壘，巴贊加森林空地上百獸聚集，這是中非雨林探險的純粹版本。',
   highlights: ['奧扎拉低地大猩猩追蹤', '剛果河畔雙城對望', '巴贊加森林空地', '布拉薩市殖民老城'],
-  wiki: ['奧扎拉-科庫阿國家公園', 'Odzala-Kokoua National Park'],
+  wiki: ['布拉柴維爾', '剛果河', 'Brazzaville'],
   facts: {
     currency: 'XAF 中非法郎（CFA100 ≈ NT$5.5）',
     language: '法語（官方）、林加拉語、剛果語',

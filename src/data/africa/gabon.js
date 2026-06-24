@@ -9,7 +9,7 @@ export default {
   description:
     '近九成國土被原始雨林覆蓋，加彭把海洋與叢林揉在一起：洛安戈國家公園裡大象走上海灘、河馬在浪裡衝浪，這是地球上少見的奇景。赤道穿城而過，原始海灘無人踩踏，這是中非最後的綠色秘境。',
   highlights: ['洛安戈海邊大象與衝浪河馬', '羅蓬戈原始雨林', '赤道地標跨線', '無人原始海灘'],
-  wiki: ['洛安戈國家公園', 'Loango National Park'],
+  wiki: ['利伯維爾', '讓蒂爾港', 'Libreville'],
   facts: {
     currency: 'XAF 中非法郎（CFA100 ≈ NT$5.5）',
     language: '法語（官方）、芳族語等部族語',

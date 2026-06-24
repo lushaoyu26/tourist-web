@@ -287,39 +287,56 @@ img {
 }
 
 /* ============ 首頁 ============ */
+/* 霧藍色系（深一點）+ 更立體的 iOS 玻璃質感 */
 .home {
+  --nord-bg: #e7edf4;
+  --nord-ink: #243140;
+  --nord-muted: #66738a;
+  --nord-accent: #4f7191;
+  --nord-accent-ink: #37577a;
+  --nord-line: rgba(55, 80, 112, 0.16);
+  --nord-card: rgba(248, 251, 255, 0.5);
+  --nord-glass-edge: rgba(255, 255, 255, 0.72);
+  --nord-glass-shadow: rgba(35, 55, 82, 0.22);
   position: relative;
   height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(1200px 800px at 75% 20%, #14254f 0%, transparent 55%),
-    radial-gradient(900px 700px at 15% 85%, #0d2b45 0%, transparent 50%),
-    linear-gradient(180deg, var(--night-1), var(--night-2) 60%, #081226);
-  color: #eef2ff;
+    radial-gradient(1100px 760px at 82% 4%, #fbfdff 0%, transparent 60%),
+    radial-gradient(820px 640px at 6% 98%, #c5d4e6 0%, transparent 58%),
+    linear-gradient(180deg, #e9eef5 0%, #d2dded 100%);
+  color: var(--nord-ink);
 }
 
-/* 星空 */
+/* 極淡霧藍暈影，增加層次 */
 .home::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image:
-    radial-gradient(1.5px 1.5px at 12% 25%, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
-    radial-gradient(1px 1px at 28% 65%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
-    radial-gradient(2px 2px at 45% 15%, rgba(160, 220, 255, 0.7) 50%, transparent 51%),
-    radial-gradient(1px 1px at 62% 42%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 78% 75%, rgba(255, 255, 255, 0.65) 50%, transparent 51%),
-    radial-gradient(1px 1px at 88% 30%, rgba(190, 230, 255, 0.6) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 35% 88%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
-    radial-gradient(1px 1px at 55% 60%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
-    radial-gradient(2px 2px at 92% 55%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
-    radial-gradient(1px 1px at 8% 50%, rgba(200, 235, 255, 0.6) 50%, transparent 51%);
+  background: radial-gradient(900px 620px at 18% 92%, rgba(79, 113, 145, 0.12), transparent 62%);
   pointer-events: none;
 }
 
 .globe-wrap {
   position: absolute;
   inset: 0;
+}
+
+/* 點國家「鑽入」轉場：中心白光綻放 */
+.globe-dive-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.9) 0%, rgba(233, 238, 245, 0.55) 42%, rgba(210, 221, 237, 0) 78%);
+  transition: opacity 0.82s ease-in;
+}
+.globe-wrap.diving {
+  cursor: default;
+}
+.globe-wrap.diving .globe-dive-flash {
+  opacity: 1;
 }
 
 .globe-loading {
@@ -329,58 +346,73 @@ img {
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
-  color: rgba(226, 236, 255, 0.7);
+  color: var(--nord-muted);
 }
 
 .home-hero {
   position: absolute;
-  top: 16vh;
+  top: 15vh;
   left: 5vw;
   z-index: 10;
-  max-width: 520px;
-  pointer-events: none;
+  max-width: 440px;
+  padding: 36px 38px 38px;
+  border-radius: 34px;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.16) 58%),
+    var(--nord-card);
+  border: 1px solid var(--nord-glass-edge);
+  backdrop-filter: blur(30px) saturate(1.7);
+  -webkit-backdrop-filter: blur(30px) saturate(1.7);
+  box-shadow:
+    0 36px 80px var(--nord-glass-shadow),
+    0 8px 22px rgba(35, 55, 82, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -16px 40px rgba(255, 255, 255, 0.22);
+  pointer-events: auto;
   animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .home-hero h1 {
-  font-size: clamp(2rem, 4.6vw, 3.4rem);
-  font-weight: 900;
-  line-height: 1.25;
-  letter-spacing: 0.01em;
-  background: linear-gradient(120deg, #ffffff 30%, #6ee7d8 75%, #38bdf8);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: none;
+  font-size: clamp(2.1rem, 4.8vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--nord-ink);
 }
 
 .home-hero p {
   margin-top: 16px;
-  font-size: 1.02rem;
-  color: rgba(226, 236, 255, 0.78);
-  max-width: 40ch;
+  font-size: 1.06rem;
+  line-height: 1.65;
+  color: var(--nord-muted);
+  max-width: 42ch;
 }
 
 .home-random {
-  margin-top: 22px;
-  padding: 13px 26px;
-  border-radius: 999px;
+  margin-top: 26px;
+  padding: 13px 28px;
+  border-radius: 16px;
   font-size: 1rem;
-  font-weight: 800;
-  color: #06122b;
-  background: linear-gradient(120deg, #6ee7d8, #38bdf8);
-  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, #5e83a5 0%, var(--nord-accent) 100%);
+  box-shadow:
+    0 10px 24px rgba(55, 87, 122, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
   pointer-events: auto;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .home-random:hover {
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 16px 40px rgba(56, 189, 248, 0.55);
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, #456486 0%, var(--nord-accent-ink) 100%);
+  box-shadow:
+    0 14px 30px rgba(55, 87, 122, 0.44),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
 
 .home-random:active {
-  transform: translateY(-1px) scale(0.99);
+  transform: translateY(0);
 }
 
 .home-hint {
@@ -389,12 +421,14 @@ img {
   right: 24px;
   z-index: 10;
   font-size: 0.85rem;
-  color: rgba(226, 236, 255, 0.65);
-  background: rgba(10, 20, 45, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--nord-muted);
+  background: var(--nord-card);
+  border: 1px solid var(--nord-glass-edge);
   padding: 8px 16px;
   border-radius: 999px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   pointer-events: none;
 }
 
@@ -417,19 +451,30 @@ img {
   gap: 8px;
   padding: 9px 16px;
   border-radius: 999px;
-  background: rgba(12, 23, 51, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(10px);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.12)),
+    var(--nord-card);
+  border: 1px solid var(--nord-glass-edge);
+  color: var(--nord-ink);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
   font-size: 0.95rem;
   font-weight: 500;
+  box-shadow:
+    0 8px 20px rgba(35, 55, 82, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
   transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s, background 0.22s;
 }
 
 .home-chip:hover {
-  transform: translateY(-4px);
-  border-color: var(--chip);
-  box-shadow: 0 8px 28px color-mix(in srgb, var(--chip) 45%, transparent);
-  background: color-mix(in srgb, var(--chip) 22%, rgba(12, 23, 51, 0.8));
+  transform: translateY(-3px);
+  border-color: rgba(79, 113, 145, 0.5);
+  box-shadow:
+    0 14px 28px rgba(35, 55, 82, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.2)),
+    rgba(248, 251, 255, 0.72);
 }
 
 .home-chip-flag {
@@ -438,7 +483,7 @@ img {
 
 .home-chip-count {
   font-size: 0.76rem;
-  opacity: 0.6;
+  color: var(--nord-muted);
 }
 
 /* 地球懸停資訊卡 */
@@ -450,18 +495,24 @@ img {
   z-index: 20;
   width: 320px;
   padding: 22px 24px;
-  border-radius: var(--radius);
-  background: rgba(10, 19, 43, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  border-radius: 28px;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.14) 60%),
+    rgba(248, 251, 255, 0.6);
+  border: 1px solid var(--nord-glass-edge);
+  backdrop-filter: blur(30px) saturate(1.7);
+  -webkit-backdrop-filter: blur(30px) saturate(1.7);
+  box-shadow:
+    0 34px 74px rgba(35, 55, 82, 0.24),
+    0 8px 20px rgba(35, 55, 82, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -14px 36px rgba(255, 255, 255, 0.2);
   pointer-events: none;
   animation: cardIn 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
 .globe-card.rich {
-  border-color: rgba(110, 231, 216, 0.35);
+  border-color: rgba(91, 124, 153, 0.4);
 }
 
 @keyframes cardIn {
@@ -483,59 +534,92 @@ img {
 
 .globe-card-flag {
   font-size: 2.4rem;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 3px 8px rgba(29, 41, 61, 0.18));
 }
 
 .globe-card h3 {
   font-size: 1.45rem;
-  font-weight: 900;
-  color: #fff;
+  font-weight: 800;
+  color: var(--nord-ink);
   line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .globe-card-en {
   font-family: var(--font-display);
   font-size: 0.85rem;
-  color: rgba(170, 195, 240, 0.75);
+  color: var(--nord-muted);
   letter-spacing: 0.06em;
 }
 
 .globe-card-tagline {
   margin-top: 12px;
   font-size: 0.98rem;
-  font-weight: 500;
-  color: #6ee7d8;
+  font-weight: 600;
+  color: var(--nord-accent);
 }
 
 .globe-card-tagline.dim {
-  color: rgba(195, 210, 245, 0.6);
+  color: var(--nord-muted);
+}
+
+.globe-card-desc {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #4a5562;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.globe-card-label {
+  margin-top: 13px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #c08a2e;
 }
 
 .globe-card-list {
   list-style: none;
-  margin-top: 10px;
+  margin-top: 7px;
   display: grid;
   gap: 5px;
 }
 
 .globe-card-list li {
+  position: relative;
+  padding-left: 14px;
   font-size: 0.88rem;
-  color: rgba(222, 232, 255, 0.85);
+  color: #45474d;
+}
+
+.globe-card-list li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #cf9f53;
 }
 
 .globe-card-foot {
   margin-top: 16px;
   padding-top: 13px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid var(--nord-line);
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.84rem;
-  color: rgba(180, 200, 240, 0.7);
+  color: var(--nord-muted);
 }
 
 .globe-card-cta {
-  color: #ffd166;
+  color: var(--nord-accent);
   font-weight: 700;
   animation: pulse-cta 1.6s ease-in-out infinite;
 }
