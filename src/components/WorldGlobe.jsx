@@ -1,20 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Globe from 'react-globe.gl'
-import {
-  MeshPhongMaterial,
-  MeshBasicMaterial,
-  Mesh,
-  DoubleSide,
-  BufferGeometry,
-  Float32BufferAttribute,
-  CanvasTexture,
-  LinearFilter,
-} from 'three'
+import { MeshPhongMaterial, TextureLoader, MeshBasicMaterial, Mesh, DoubleSide, Group } from 'three'
 import ConicPolygonGeometry from 'three-conic-polygon-geometry'
 import { useNavigate } from 'react-router-dom'
 import { COUNTRY_BY_ADMIN, ADMIN_ZH } from '../data/index.js'
 
-// 淺藍海洋
+// 淺藍海洋（加深一些）
 const OCEAN_MATERIAL = new MeshPhongMaterial({
   color: '#8bb8dd',
   emissive: '#7aa9d2',
@@ -22,7 +13,7 @@ const OCEAN_MATERIAL = new MeshPhongMaterial({
   shininess: 3,
 })
 
-// 幾個大洋名稱
+// 幾個大洋的名稱（標籤）
 const OCEANS = [
   { lat: 4, lng: 165, text: 'Pacific Ocean' },
   { lat: -22, lng: 78, text: 'Indian Ocean' },
@@ -32,17 +23,23 @@ const OCEANS = [
 ]
 
 const NORD = {
-  capBase: '#cdd9e6', // 國旗底下的中性底色（多被國旗蓋住）
-  capHover: 'rgba(255, 221, 160, 0.92)', // 懸停浮起時的暖色高亮
+  matched: '#4f8e8a', // 霧青湖綠（國旗載入前/載入失敗時的底色）
+  matchedHover: '#3a6c68',
+  land: '#cfd9e5',
+  landHover: '#b9c6d7',
   side: 'rgba(70, 95, 110, 0.4)',
-  stroke: 'rgba(70, 95, 120, 0.5)',
+  stroke: 'rgba(70, 95, 120, 0.5)', // 國界線
 }
 
+// react-globe.gl 球半徑 100；國旗殼層略高於球面
 const GLOBE_R = 100
+// 國旗殼層略高於多邊形（搭配材質 polygonOffset 一起避免 z-fighting 閃爍）
 const FLAG_LO = GLOBE_R * 1.007
 const FLAG_HI = GLOBE_R * 1.008
-const HOVER_ALT = 0.06
+const HOVER_ALT = 0.06 // 懸停浮起高度
+const HOVER_SCALE = 1.06 // 懸停時國旗向外抬升（與多邊形浮起同步）
 
+// Natural Earth 把 France / Norway 的 ISO_A2 標成 -99，手動補
 const FLAG_OVERRIDE = { France: 'fr', Norway: 'no' }
 const flagCode = (feat) => {
   const p = feat.properties
@@ -50,11 +47,16 @@ const flagCode = (feat) => {
   return iso ? iso.toLowerCase() : null
 }
 
+const texLoader = new TextureLoader()
+const texCache = {}
+const flagTex = (code) => (texCache[code] ||= texLoader.load(`/flags/${code}.png`))
+
 function countryPolygons(feat) {
   const g = feat.geometry
   if (!g) return []
   return g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []
 }
+
 function ringBox(ring) {
   let minx = 180, maxx = -180, miny = 90, maxy = -90
   for (const [x, y] of ring) {
@@ -65,7 +67,23 @@ function ringBox(ring) {
   }
   return { minx, maxx, miny, maxy, area: (maxx - minx) * (maxy - miny) }
 }
-function largestPolygon(feat) {
+
+// 國家中心（取最大環的 bbox 中心）— 給標籤與「鑽入」動畫用
+function featureCenter(feat) {
+  let best = null
+  let bestArea = -1
+  for (const poly of countryPolygons(feat)) {
+    const b = ringBox(poly[0])
+    if (b.area > bestArea) {
+      bestArea = b.area
+      best = b
+    }
+  }
+  return best ? { lat: (best.miny + best.maxy) / 2, lng: (best.minx + best.maxx) / 2 } : null
+}
+
+// 只取最大的那塊多邊形貼國旗（效能：每國 1 個 mesh，跳過小碎島）
+function topPolygons(feat) {
   let best = null
   let bestArea = -1
   for (const p of countryPolygons(feat)) {
@@ -75,17 +93,10 @@ function largestPolygon(feat) {
       best = p
     }
   }
-  return best
-}
-function featureCenter(feat) {
-  const p = largestPolygon(feat)
-  if (!p) return null
-  const b = ringBox(p[0])
-  return { lat: (b.miny + b.maxy) / 2, lng: (b.minx + b.maxx) / 2 }
+  return best ? [best] : []
 }
 
-// 首頁 3D 地球：所有國家用「單一合併網格 + 國旗圖集」鋪上國旗（1 個 draw call），
-// 淺藍海洋、大洋與國家英文名標籤、懸停浮起、點擊「鑽入」國家頁。
+// 首頁 3D 地球：很淺藍海洋、每個國家鋪上國旗與英文名，懸停浮起並顯示景點，點擊「鑽入」該國。
 
 export default function WorldGlobe() {
   const globeRef = useRef()
@@ -95,7 +106,6 @@ export default function WorldGlobe() {
   const [hover, setHover] = useState(null)
   const [diving, setDiving] = useState(false)
   const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight })
-  const [flagObject, setFlagObject] = useState(null)
 
   useEffect(() => {
     fetch('/data/countries.geojson')
@@ -135,122 +145,72 @@ export default function WorldGlobe() {
   const matched = useCallback((feat) => (feat ? COUNTRY_BY_ADMIN[feat.properties.ADMIN] : null), [])
 
   const capColor = useCallback(
-    (feat) => (hover && feat === hover ? NORD.capHover : NORD.capBase),
-    [hover]
+    (feat) => {
+      const data = matched(feat)
+      const isHover = hover && feat === hover
+      if (data) return isHover ? NORD.matchedHover : NORD.matched
+      return isHover ? NORD.landHover : NORD.land
+    },
+    [hover, matched]
   )
+
   const altitude = useCallback((feat) => (hover && feat === hover ? HOVER_ALT : 0.004), [hover])
 
-  // 建立「國旗圖集 + 單一合併網格」（非同步：載入所有國旗圖、拼成一張、合併幾何）
-  useEffect(() => {
-    if (!countries.length) return
-    let alive = true
-    let built = null
-    ;(async () => {
-      const items = []
-      for (const f of countries) {
-        const code = flagCode(f)
-        if (!code) continue
-        const poly = largestPolygon(f)
-        if (!poly) continue
-        items.push({ code, opacity: matched(f) ? 0.82 : 0.5, poly })
-      }
-      if (!items.length) return
+  // 每個國家的國旗貼片資料
+  const flagData = useMemo(() => {
+    const out = []
+    for (const f of countries) {
+      const code = flagCode(f)
+      if (!code) continue
+      const polys = topPolygons(f)
+      if (!polys.length) continue
+      out.push({ admin: f.properties.ADMIN, code, matched: !!matched(f), polygons: polys })
+    }
+    return out
+  }, [countries, matched])
 
-      const codes = [...new Set(items.map((i) => i.code))]
-      const cols = Math.ceil(Math.sqrt(codes.length))
-      const rows = Math.ceil(codes.length / cols)
-      const cw = 96, ch = 64
-      const canvas = document.createElement('canvas')
-      canvas.width = cols * cw
-      canvas.height = rows * ch
-      const ctx = canvas.getContext('2d')
-      const cell = {}
-      await Promise.all(
-        codes.map(
-          (code, idx) =>
-            new Promise((resolve) => {
-              const col = idx % cols
-              const row = Math.floor(idx / cols)
-              cell[code] = { col, row }
-              const img = new Image()
-              img.onload = () => {
-                try {
-                  ctx.drawImage(img, col * cw + 1, row * ch + 1, cw - 2, ch - 2)
-                } catch {
-                  /* ignore */
-                }
-                resolve()
-              }
-              img.onerror = () => resolve()
-              img.src = `/flags/${code}.png`
-            })
-        )
-      )
-      if (!alive) return
-
-      const atlas = new CanvasTexture(canvas)
-      atlas.minFilter = LinearFilter
-      atlas.magFilter = LinearFilter
-
-      const positions = []
-      const uvs = []
-      const colors = []
-      for (const it of items) {
-        let geo
-        try {
-          geo = new ConicPolygonGeometry(it.poly, FLAG_LO, FLAG_HI, false, true, false, 9).toNonIndexed()
-        } catch {
-          continue
-        }
-        const pos = geo.attributes.position
-        const uv = geo.attributes.uv
-        if (!pos || !uv) {
-          geo.dispose?.()
-          continue
-        }
-        const c = cell[it.code]
-        const n = pos.count
-        for (let i = 0; i < n; i++) {
-          positions.push(pos.getX(i), pos.getY(i), pos.getZ(i))
-          const u = Math.min(1, Math.max(0, uv.getX(i)))
-          const v = Math.min(1, Math.max(0, uv.getY(i)))
-          uvs.push((c.col + 0.03 + u * 0.94) / cols, (rows - c.row - 1 + 0.03 + v * 0.94) / rows)
-          colors.push(1, 1, 1, it.opacity)
-        }
-        geo.dispose?.()
-      }
-      if (!alive || !positions.length) return
-
-      const merged = new BufferGeometry()
-      merged.setAttribute('position', new Float32BufferAttribute(positions, 3))
-      merged.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
-      merged.setAttribute('color', new Float32BufferAttribute(colors, 4))
-      const mat = new MeshBasicMaterial({
-        map: atlas,
-        vertexColors: true,
-        transparent: true,
-        depthWrite: false,
-        side: DoubleSide,
-        polygonOffset: true,
-        polygonOffsetFactor: -4,
-        polygonOffsetUnits: -4,
-      })
-      const mesh = new Mesh(merged, mat)
-      mesh.renderOrder = 3
-      mesh.raycast = () => {}
-      built = mesh
-      setFlagObject(mesh)
-    })()
-
-    return () => {
-      alive = false
-      if (built) {
-        built.geometry?.dispose?.()
-        built.material?.map?.dispose?.()
-        built.material?.dispose?.()
+  // 用 ConicPolygonGeometry 把國旗貼進國家輪廓、順著球面（UV 自動對應 bbox）
+  const buildFlag = useCallback((d) => {
+    const group = new Group()
+    const tex = flagTex(d.code)
+    const opacity = d.matched ? 0.82 : 0.5 // 收錄國家的國旗較鮮明
+    for (const poly of d.polygons) {
+      try {
+        const geo = new ConicPolygonGeometry(poly, FLAG_LO, FLAG_HI, false, true, false, 9)
+        const mat = new MeshBasicMaterial({
+          map: tex,
+          transparent: true,
+          opacity,
+          side: DoubleSide,
+          depthWrite: false,
+          polygonOffset: true,
+          polygonOffsetFactor: -4,
+          polygonOffsetUnits: -4,
+        })
+        const mesh = new Mesh(geo, mat)
+        mesh.raycast = () => {} // 點擊穿透，交給底下的國家多邊形
+        group.add(mesh)
+      } catch {
+        // 個別多邊形（如跨換日線）建立失敗時略過
       }
     }
-  }, [countries, matched])
+    group.userData.flagAdmin = d.admin
+    group.renderOrder = 3
+    return group
+  }, [])
+
+  // 懸停時把該國國旗也一起抬升（與多邊形浮起同步），做出「懸浮」效果
+  useEffect(() => {
+    const globe = globeRef.current
+    const scene = globe && globe.scene && globe.scene()
+    if (!scene) return
+    const hoverAdmin = hover?.properties?.ADMIN
+    scene.traverse((obj) => {
+      if (obj.userData && obj.userData.flagAdmin) {
+        obj.scale.setScalar(obj.userData.flagAdmin === hoverAdmin ? HOVER_SCALE : 1)
+      }
+    })
+  }, [hover, flagData])
 
   // 標籤：所有國家英文名（小）+ 幾個大洋名稱（大、淡藍）
   const labelData = useMemo(() => {
@@ -266,8 +226,7 @@ export default function WorldGlobe() {
     return [...cc, ...oc]
   }, [countries])
 
-  const passThrough = useCallback((d) => d, [])
-
+  // 點擊國家：先把鏡頭「鑽入」該國，再進入國家頁
   const diveTo = useCallback(
     (feat) => {
       const data = matched(feat)
@@ -304,9 +263,9 @@ export default function WorldGlobe() {
         polygonCapColor={capColor}
         polygonSideColor={() => NORD.side}
         polygonStrokeColor={() => NORD.stroke}
-        polygonsTransitionDuration={220}
-        customLayerData={flagObject ? [flagObject] : []}
-        customThreeObject={passThrough}
+        polygonsTransitionDuration={250}
+        customLayerData={flagData}
+        customThreeObject={buildFlag}
         labelsData={labelData}
         labelLat={(d) => d.lat}
         labelLng={(d) => d.lng}
@@ -320,7 +279,7 @@ export default function WorldGlobe() {
         onPolygonClick={diveTo}
       />
     ),
-    [countries, size, altitude, capColor, flagObject, passThrough, labelData, diveTo]
+    [countries, size, altitude, capColor, flagData, buildFlag, labelData, diveTo]
   )
 
   return (
