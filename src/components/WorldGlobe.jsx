@@ -5,13 +5,22 @@ import ConicPolygonGeometry from 'three-conic-polygon-geometry'
 import { useNavigate } from 'react-router-dom'
 import { COUNTRY_BY_ADMIN, ADMIN_ZH } from '../data/index.js'
 
-// 很淺的藍色海洋
+// 淺藍海洋（加深一些）
 const OCEAN_MATERIAL = new MeshPhongMaterial({
-  color: '#dcebf8',
-  emissive: '#cfe2f2',
-  emissiveIntensity: 0.25,
-  shininess: 2,
+  color: '#8bb8dd',
+  emissive: '#7aa9d2',
+  emissiveIntensity: 0.22,
+  shininess: 3,
 })
+
+// 幾個大洋的名稱（標籤）
+const OCEANS = [
+  { lat: 4, lng: 165, text: 'Pacific Ocean' },
+  { lat: -22, lng: 78, text: 'Indian Ocean' },
+  { lat: 14, lng: -42, text: 'Atlantic Ocean' },
+  { lat: -58, lng: -130, text: 'Southern Ocean' },
+  { lat: 85, lng: 0, text: 'Arctic Ocean' },
+]
 
 const NORD = {
   matched: '#4f8e8a', // 霧青湖綠（國旗載入前/載入失敗時的底色）
@@ -72,14 +81,18 @@ function featureCenter(feat) {
   return best ? { lat: (best.miny + best.maxy) / 2, lng: (best.minx + best.maxx) / 2 } : null
 }
 
-// 取最大的 1~2 個多邊形貼國旗（控制效能：跳過小碎島）
+// 只取最大的那塊多邊形貼國旗（效能：每國 1 個 mesh，跳過小碎島）
 function topPolygons(feat) {
-  const scored = countryPolygons(feat)
-    .map((p) => ({ p, area: ringBox(p[0]).area }))
-    .sort((a, b) => b.area - a.area)
-  if (!scored.length) return []
-  const top = scored[0].area
-  return scored.filter((s, i) => i === 0 || (i < 2 && s.area > top * 0.15)).map((s) => s.p)
+  let best = null
+  let bestArea = -1
+  for (const p of countryPolygons(feat)) {
+    const a = ringBox(p[0]).area
+    if (a > bestArea) {
+      bestArea = a
+      best = p
+    }
+  }
+  return best ? [best] : []
 }
 
 // 首頁 3D 地球：很淺藍海洋、每個國家鋪上國旗與英文名，懸停浮起並顯示景點，點擊「鑽入」該國。
@@ -162,7 +175,7 @@ export default function WorldGlobe() {
     const opacity = d.matched ? 0.82 : 0.5 // 收錄國家的國旗較鮮明
     for (const poly of d.polygons) {
       try {
-        const geo = new ConicPolygonGeometry(poly, FLAG_LO, FLAG_HI, false, true, false, 5)
+        const geo = new ConicPolygonGeometry(poly, FLAG_LO, FLAG_HI, false, true, false, 9)
         const mat = new MeshBasicMaterial({
           map: tex,
           transparent: true,
@@ -195,17 +208,19 @@ export default function WorldGlobe() {
     })
   }, [hover, flagData])
 
-  // 所有國家的英文名標籤
-  const labelData = useMemo(
-    () =>
-      countries
-        .map((f) => {
-          const c = featureCenter(f)
-          return c ? { lat: c.lat, lng: c.lng, text: f.properties.NAME || f.properties.ADMIN } : null
-        })
-        .filter(Boolean),
-    [countries]
-  )
+  // 標籤：所有國家英文名（小）+ 幾個大洋名稱（大、淡藍）
+  const labelData = useMemo(() => {
+    const cc = countries
+      .map((f) => {
+        const c = featureCenter(f)
+        return c
+          ? { lat: c.lat, lng: c.lng, text: f.properties.NAME || f.properties.ADMIN, size: 1.0, color: 'rgba(20, 30, 45, 0.95)' }
+          : null
+      })
+      .filter(Boolean)
+    const oc = OCEANS.map((o) => ({ ...o, size: 2.2, color: 'rgba(31, 64, 102, 0.55)' }))
+    return [...cc, ...oc]
+  }, [countries])
 
   // 點擊國家：先把鏡頭「鑽入」該國，再進入國家頁
   const diveTo = useCallback(
@@ -251,8 +266,8 @@ export default function WorldGlobe() {
         labelLat={(d) => d.lat}
         labelLng={(d) => d.lng}
         labelText={(d) => d.text}
-        labelSize={1.1}
-        labelColor={() => 'rgba(20, 30, 45, 0.95)'}
+        labelSize={(d) => d.size}
+        labelColor={(d) => d.color}
         labelResolution={2}
         labelDotRadius={0}
         labelAltitude={0.02}
