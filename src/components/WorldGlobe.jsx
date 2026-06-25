@@ -176,7 +176,7 @@ export default function WorldGlobe() {
     const opacity = d.matched ? 0.82 : 0.5 // 收錄國家的國旗較鮮明
     for (const poly of d.polygons) {
       try {
-        const geo = new ConicPolygonGeometry(poly, FLAG_LO, FLAG_HI, false, true, false, 9)
+        const geo = new ConicPolygonGeometry(poly, FLAG_LO, FLAG_HI, false, true, false, 14)
         const mat = new MeshBasicMaterial({
           map: tex,
           transparent: true,
@@ -212,9 +212,10 @@ export default function WorldGlobe() {
     })
   }, [hover, flagData])
 
-  // 標籤：所有國家英文名（小）+ 幾個大洋名稱（大、淡藍）
+  // 標籤：只留較大/重要的國家英文名（LABELRANK<=3，標籤瘦身）+ 幾個大洋名稱
   const labelData = useMemo(() => {
     const cc = countries
+      .filter((f) => (f.properties.LABELRANK ?? 9) <= 3)
       .map((f) => {
         const c = featureCenter(f)
         return c
