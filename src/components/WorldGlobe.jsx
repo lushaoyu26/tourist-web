@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Globe from 'react-globe.gl'
-import { MeshBasicMaterial, CanvasTexture } from 'three'
+import { MeshBasicMaterial, CanvasTexture, Mesh, DoubleSide, TextureLoader } from 'three'
+import ConicPolygonGeometry from 'three-conic-polygon-geometry'
 import { useNavigate } from 'react-router-dom'
 import { COUNTRY_BY_ADMIN, ADMIN_ZH } from '../data/index.js'
 
@@ -16,8 +17,15 @@ const OCEANS = [
   { lat: 85, lng: 0, text: 'Arctic Ocean' },
 ]
 
-const HOVER_ALT = 0.06
-const HOVER_CAP = 'rgba(255, 226, 150, 0.55)' // 懸停高亮（半透明，透出底下國旗）
+const GLOBE_R = 100
+// 懸停浮起的單面國旗殼層高度（浮在烤貼圖表面之上）
+const HOVER_LO = GLOBE_R * 1.05
+const HOVER_HI = GLOBE_R * 1.053
+
+// 單面國旗貼圖（懸停時用，快取）
+const flagTexLoader = new TextureLoader()
+const flagTexCache = {}
+const flagTex = (code) => (flagTexCache[code] ||= flagTexLoader.load(`/flags/${code}.png`))
 
 const FLAG_OVERRIDE = { France: 'fr', Norway: 'no' }
 const flagCode = (feat) => {
@@ -222,9 +230,43 @@ export default function WorldGlobe() {
 
   const matched = useCallback((feat) => (feat ? COUNTRY_BY_ADMIN[feat.properties.ADMIN] : null), [])
 
-  // 多邊形層僅供互動與懸停高亮（國旗/國界已烤進貼圖）
-  const capColor = useCallback((feat) => (hover && feat === hover ? HOVER_CAP : 'rgba(0,0,0,0)'), [hover])
-  const altitude = useCallback((feat) => (hover && feat === hover ? HOVER_ALT : 0.002), [hover])
+  // 多邊形層全透明、固定，僅供滑鼠偵測（國旗/國界已烤進貼圖；懸停效果用浮起國旗）
+  const capColor = useCallback(() => 'rgba(0,0,0,0)', [])
+  const altitude = useCallback(() => 0.004, [])
+
+  // 懸停：在該國疊一面「浮起的國旗」（只有一面，滑到哪浮到哪）
+  useEffect(() => {
+    const scene = globeRef.current?.scene?.()
+    if (!scene || !hover || diving) return
+    const code = flagCode(hover)
+    const poly = largestPolygon(hover)
+    if (!code || !poly) return
+    let mesh
+    try {
+      const geo = new ConicPolygonGeometry(poly, HOVER_LO, HOVER_HI, false, true, false, 10)
+      const mat = new MeshBasicMaterial({
+        map: flagTex(code),
+        side: DoubleSide,
+        transparent: true,
+        opacity: 0.98,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -6,
+        polygonOffsetUnits: -6,
+      })
+      mesh = new Mesh(geo, mat)
+      mesh.raycast = () => {}
+      mesh.renderOrder = 5
+      scene.add(mesh)
+    } catch {
+      return
+    }
+    return () => {
+      scene.remove(mesh)
+      mesh.geometry?.dispose?.()
+      mesh.material?.dispose?.() // 不 dispose map：國旗貼圖有快取共用
+    }
+  }, [hover, diving])
 
   const labelData = useMemo(() => {
     const cc = countries
