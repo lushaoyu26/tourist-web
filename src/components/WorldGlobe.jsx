@@ -23,12 +23,12 @@ const OCEANS = [
 ]
 
 const NORD = {
-  matched: '#4f8e8a', // 霧青湖綠（國旗載入前/載入失敗時的底色）
-  matchedHover: '#3a6c68',
-  land: '#cfd9e5',
-  landHover: '#b9c6d7',
-  side: 'rgba(70, 95, 110, 0.4)',
-  stroke: 'rgba(70, 95, 120, 0.5)', // 國界線
+  matched: '#b9c6d4', // 中性底色（國旗底下，不再用綠色洗淡國旗）
+  matchedHover: 'rgba(255, 219, 150, 0.92)', // 懸停暖色高亮
+  land: '#b9c6d4',
+  landHover: 'rgba(255, 219, 150, 0.92)',
+  side: 'rgba(70, 95, 110, 0.3)',
+  stroke: 'rgba(15, 26, 42, 0.92)', // 深色國界線
 }
 
 // react-globe.gl 球半徑 100；國旗殼層略高於球面
@@ -173,7 +173,7 @@ export default function WorldGlobe() {
   const buildFlag = useCallback((d) => {
     const group = new Group()
     const tex = flagTex(d.code)
-    const opacity = d.matched ? 0.82 : 0.5 // 收錄國家的國旗較鮮明
+    const opacity = d.matched ? 0.9 : 0.82 // 提高不透明度，國旗顏色更實
     for (const poly of d.polygons) {
       try {
         const geo = new ConicPolygonGeometry(poly, FLAG_LO, FLAG_HI, false, true, false, 14)
@@ -264,7 +264,7 @@ export default function WorldGlobe() {
         polygonCapColor={capColor}
         polygonSideColor={() => NORD.side}
         polygonStrokeColor={() => NORD.stroke}
-        polygonsTransitionDuration={250}
+        polygonsTransitionDuration={0}
         customLayerData={flagData}
         customThreeObject={buildFlag}
         labelsData={labelData}
