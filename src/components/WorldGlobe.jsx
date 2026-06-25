@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Globe from 'react-globe.gl'
-import { MeshPhongMaterial, CanvasTexture } from 'three'
+import { MeshBasicMaterial, CanvasTexture } from 'three'
 import { useNavigate } from 'react-router-dom'
 import { COUNTRY_BY_ADMIN, ADMIN_ZH } from '../data/index.js'
 
-// 地球材質：先給海洋底色，國旗地圖烤好後再貼上 map（不透明、無疊算）
+// 地球材質：不打光（避免明暗交界掃過造成「灰色閃爍」與背光面偏暗）；國旗地圖烤好後貼上 map
 const OCEAN = '#8bb8dd'
-const GLOBE_MATERIAL = new MeshPhongMaterial({ color: OCEAN, emissive: 0x000000, shininess: 4 })
+const GLOBE_MATERIAL = new MeshBasicMaterial({ color: OCEAN })
 
 const OCEANS = [
   { lat: 4, lng: 165, text: 'Pacific Ocean' },
@@ -60,8 +60,64 @@ function featureCenter(feat) {
   return { lat: (b.miny + b.maxy) / 2, lng: (b.minx + b.maxx) / 2 }
 }
 
-// 把所有國旗「烤」成一張等距圓柱(equirectangular)世界地圖，含深色國界線
-function buildFlagMap(features, imgs, W, H) {
+const loadImg = (code) =>
+  new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => resolve(null)
+    img.src = `/flags/${code}.png`
+  })
+
+// 把環的經度「解纏」成連續值（處理跨換日線：相鄰點跳超過 180° 就 ±360 修正）
+function ringToPts(ring) {
+  const pts = []
+  let prev = null
+  for (const [lng, lat] of ring) {
+    let L = lng
+    if (prev !== null) {
+      while (L - prev > 180) L -= 360
+      while (L - prev < -180) L += 360
+    }
+    pts.push([L, lat])
+    prev = L
+  }
+  return pts
+}
+
+// 畫單一多邊形（國旗裁切 + 深色描邊），用 -W/0/+W 三個位移涵蓋換日線兩側
+function drawPoly(ctx, pts, img, W, H) {
+  let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity
+  const path = new Path2D()
+  pts.forEach(([L, lat], i) => {
+    const x = ((L + 180) / 360) * W
+    const y = ((90 - lat) / 180) * H
+    if (i === 0) path.moveTo(x, y)
+    else path.lineTo(x, y)
+    if (x < minx) minx = x
+    if (x > maxx) maxx = x
+    if (y < miny) miny = y
+    if (y > maxy) maxy = y
+  })
+  path.closePath()
+  const bw = Math.max(1, maxx - minx)
+  const bh = Math.max(1, maxy - miny)
+  for (const shift of [-W, 0, W]) {
+    ctx.save()
+    ctx.translate(shift, 0)
+    if (img && img.width) {
+      ctx.save()
+      ctx.clip(path)
+      ctx.drawImage(img, minx, miny, bw, bh)
+      ctx.restore()
+    }
+    ctx.stroke(path)
+    ctx.restore()
+  }
+}
+
+// 把所有國旗「烤」成一張等距圓柱(equirectangular)世界地圖（含深色國界線）。
+// 分批載入國旗圖（一次少量、畫完即釋放）以控制記憶體。
+async function buildFlagMap(features, W, H) {
   const canvas = document.createElement('canvas')
   canvas.width = W
   canvas.height = H
@@ -72,35 +128,31 @@ function buildFlagMap(features, imgs, W, H) {
   ctx.lineWidth = Math.max(1.5, W / 1600)
   ctx.strokeStyle = 'rgba(15, 26, 42, 0.9)'
 
+  const groups = new Map() // code -> 多邊形(pts) 陣列
+  const noFlag = []
   for (const f of features) {
     const code = flagCode(f)
-    const img = code ? imgs[code] : null
     for (const poly of countryPolygons(f)) {
-      const ring = poly[0]
-      let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity
-      const path = new Path2D()
-      ring.forEach(([lng, lat], i) => {
-        const x = ((lng + 180) / 360) * W
-        const y = ((90 - lat) / 180) * H
-        if (i === 0) path.moveTo(x, y)
-        else path.lineTo(x, y)
-        if (x < minx) minx = x
-        if (x > maxx) maxx = x
-        if (y < miny) miny = y
-        if (y > maxy) maxy = y
-      })
-      path.closePath()
-      // 跳過跨越換日線（橫跨幾乎整個寬度）的多邊形，避免橫向拖糊
-      if (maxx - minx > W * 0.8) continue
-      if (img && img.width) {
-        ctx.save()
-        ctx.clip(path)
-        ctx.drawImage(img, minx, miny, Math.max(1, maxx - minx), Math.max(1, maxy - miny))
-        ctx.restore()
+      const pts = ringToPts(poly[0])
+      if (code) {
+        if (!groups.has(code)) groups.set(code, [])
+        groups.get(code).push(pts)
+      } else {
+        noFlag.push(pts)
       }
-      ctx.stroke(path)
     }
   }
+
+  const codes = [...groups.keys()]
+  const BATCH = 6
+  for (let i = 0; i < codes.length; i += BATCH) {
+    const slice = codes.slice(i, i + BATCH)
+    const imgs = await Promise.all(slice.map(loadImg))
+    slice.forEach((code, j) => {
+      for (const pts of groups.get(code)) drawPoly(ctx, pts, imgs[j], W, H)
+    })
+  }
+  for (const pts of noFlag) drawPoly(ctx, pts, null, W, H)
   return canvas
 }
 
@@ -150,35 +202,16 @@ export default function WorldGlobe() {
     globe.controls().autoRotate = !hover && !diving
   }, [hover, diving])
 
-  // 載入國旗圖 → 烤成世界地圖 → 貼到地球材質
+  // 烤國旗世界地圖 → 貼到地球材質（不打光，全亮、無明暗交界閃爍）
   useEffect(() => {
     if (!countries.length) return
     let alive = true
     ;(async () => {
-      const codes = [...new Set(countries.map(flagCode).filter(Boolean))]
-      const imgs = {}
-      await Promise.all(
-        codes.map(
-          (code) =>
-            new Promise((resolve) => {
-              const img = new Image()
-              img.onload = () => {
-                imgs[code] = img
-                resolve()
-              }
-              img.onerror = () => resolve()
-              img.src = `/flags/${code}.png`
-            })
-        )
-      )
+      const canvas = await buildFlagMap(countries, 4096, 2048)
       if (!alive) return
-      const canvas = buildFlagMap(countries, imgs, 4096, 2048)
       const tex = new CanvasTexture(canvas)
       tex.anisotropy = 4
       GLOBE_MATERIAL.map = tex
-      GLOBE_MATERIAL.emissiveMap = tex
-      GLOBE_MATERIAL.emissive.set(0xffffff)
-      GLOBE_MATERIAL.emissiveIntensity = 0.5 // 讓背光面的國旗也看得清
       GLOBE_MATERIAL.color.set(0xffffff)
       GLOBE_MATERIAL.needsUpdate = true
     })()
