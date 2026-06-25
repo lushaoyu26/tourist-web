@@ -1,19 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Globe from 'react-globe.gl'
-import { MeshPhongMaterial, TextureLoader, MeshBasicMaterial, Mesh, DoubleSide, Group } from 'three'
-import ConicPolygonGeometry from 'three-conic-polygon-geometry'
+import { MeshPhongMaterial, CanvasTexture } from 'three'
 import { useNavigate } from 'react-router-dom'
 import { COUNTRY_BY_ADMIN, ADMIN_ZH } from '../data/index.js'
 
-// 淺藍海洋（加深一些）
-const OCEAN_MATERIAL = new MeshPhongMaterial({
-  color: '#8bb8dd',
-  emissive: '#7aa9d2',
-  emissiveIntensity: 0.22,
-  shininess: 3,
-})
+// 地球材質：先給海洋底色，國旗地圖烤好後再貼上 map（不透明、無疊算）
+const OCEAN = '#8bb8dd'
+const GLOBE_MATERIAL = new MeshPhongMaterial({ color: OCEAN, emissive: 0x000000, shininess: 4 })
 
-// 幾個大洋的名稱（標籤）
 const OCEANS = [
   { lat: 4, lng: 165, text: 'Pacific Ocean' },
   { lat: -22, lng: 78, text: 'Indian Ocean' },
@@ -22,24 +16,9 @@ const OCEANS = [
   { lat: 85, lng: 0, text: 'Arctic Ocean' },
 ]
 
-const NORD = {
-  matched: '#b9c6d4', // 中性底色（國旗底下，不再用綠色洗淡國旗）
-  matchedHover: 'rgba(255, 219, 150, 0.92)', // 懸停暖色高亮
-  land: '#b9c6d4',
-  landHover: 'rgba(255, 219, 150, 0.92)',
-  side: 'rgba(70, 95, 110, 0.3)',
-  stroke: 'rgba(15, 26, 42, 0.92)', // 深色國界線
-}
+const HOVER_ALT = 0.06
+const HOVER_CAP = 'rgba(255, 226, 150, 0.55)' // 懸停高亮（半透明，透出底下國旗）
 
-// react-globe.gl 球半徑 100；國旗殼層略高於球面
-const GLOBE_R = 100
-// 國旗殼層略高於多邊形（搭配材質 polygonOffset 一起避免 z-fighting 閃爍）
-const FLAG_LO = GLOBE_R * 1.007
-const FLAG_HI = GLOBE_R * 1.008
-const HOVER_ALT = 0.06 // 懸停浮起高度
-const HOVER_SCALE = 1.06 // 懸停時國旗向外抬升（與多邊形浮起同步）
-
-// Natural Earth 把 France / Norway 的 ISO_A2 標成 -99，手動補
 const FLAG_OVERRIDE = { France: 'fr', Norway: 'no' }
 const flagCode = (feat) => {
   const p = feat.properties
@@ -47,16 +26,11 @@ const flagCode = (feat) => {
   return iso ? iso.toLowerCase() : null
 }
 
-const texLoader = new TextureLoader()
-const texCache = {}
-const flagTex = (code) => (texCache[code] ||= texLoader.load(`/flags/${code}.png`))
-
 function countryPolygons(feat) {
   const g = feat.geometry
   if (!g) return []
   return g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []
 }
-
 function ringBox(ring) {
   let minx = 180, maxx = -180, miny = 90, maxy = -90
   for (const [x, y] of ring) {
@@ -67,23 +41,7 @@ function ringBox(ring) {
   }
   return { minx, maxx, miny, maxy, area: (maxx - minx) * (maxy - miny) }
 }
-
-// 國家中心（取最大環的 bbox 中心）— 給標籤與「鑽入」動畫用
-function featureCenter(feat) {
-  let best = null
-  let bestArea = -1
-  for (const poly of countryPolygons(feat)) {
-    const b = ringBox(poly[0])
-    if (b.area > bestArea) {
-      bestArea = b.area
-      best = b
-    }
-  }
-  return best ? { lat: (best.miny + best.maxy) / 2, lng: (best.minx + best.maxx) / 2 } : null
-}
-
-// 只取最大的那塊多邊形貼國旗（效能：每國 1 個 mesh，跳過小碎島）
-function topPolygons(feat) {
+function largestPolygon(feat) {
   let best = null
   let bestArea = -1
   for (const p of countryPolygons(feat)) {
@@ -93,10 +51,60 @@ function topPolygons(feat) {
       best = p
     }
   }
-  return best ? [best] : []
+  return best
+}
+function featureCenter(feat) {
+  const p = largestPolygon(feat)
+  if (!p) return null
+  const b = ringBox(p[0])
+  return { lat: (b.miny + b.maxy) / 2, lng: (b.minx + b.maxx) / 2 }
 }
 
-// 首頁 3D 地球：很淺藍海洋、每個國家鋪上國旗與英文名，懸停浮起並顯示景點，點擊「鑽入」該國。
+// 把所有國旗「烤」成一張等距圓柱(equirectangular)世界地圖，含深色國界線
+function buildFlagMap(features, imgs, W, H) {
+  const canvas = document.createElement('canvas')
+  canvas.width = W
+  canvas.height = H
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = OCEAN
+  ctx.fillRect(0, 0, W, H)
+  ctx.lineJoin = 'round'
+  ctx.lineWidth = Math.max(1.5, W / 1600)
+  ctx.strokeStyle = 'rgba(15, 26, 42, 0.9)'
+
+  for (const f of features) {
+    const code = flagCode(f)
+    const img = code ? imgs[code] : null
+    for (const poly of countryPolygons(f)) {
+      const ring = poly[0]
+      let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity
+      const path = new Path2D()
+      ring.forEach(([lng, lat], i) => {
+        const x = ((lng + 180) / 360) * W
+        const y = ((90 - lat) / 180) * H
+        if (i === 0) path.moveTo(x, y)
+        else path.lineTo(x, y)
+        if (x < minx) minx = x
+        if (x > maxx) maxx = x
+        if (y < miny) miny = y
+        if (y > maxy) maxy = y
+      })
+      path.closePath()
+      // 跳過跨越換日線（橫跨幾乎整個寬度）的多邊形，避免橫向拖糊
+      if (maxx - minx > W * 0.8) continue
+      if (img && img.width) {
+        ctx.save()
+        ctx.clip(path)
+        ctx.drawImage(img, minx, miny, Math.max(1, maxx - minx), Math.max(1, maxy - miny))
+        ctx.restore()
+      }
+      ctx.stroke(path)
+    }
+  }
+  return canvas
+}
+
+// 首頁 3D 地球：國旗烤進地表貼圖（不透明、無大氣疊算）= 順；懸停浮起高亮、點擊鑽入國家頁。
 
 export default function WorldGlobe() {
   const globeRef = useRef()
@@ -142,77 +150,49 @@ export default function WorldGlobe() {
     globe.controls().autoRotate = !hover && !diving
   }, [hover, diving])
 
+  // 載入國旗圖 → 烤成世界地圖 → 貼到地球材質
+  useEffect(() => {
+    if (!countries.length) return
+    let alive = true
+    ;(async () => {
+      const codes = [...new Set(countries.map(flagCode).filter(Boolean))]
+      const imgs = {}
+      await Promise.all(
+        codes.map(
+          (code) =>
+            new Promise((resolve) => {
+              const img = new Image()
+              img.onload = () => {
+                imgs[code] = img
+                resolve()
+              }
+              img.onerror = () => resolve()
+              img.src = `/flags/${code}.png`
+            })
+        )
+      )
+      if (!alive) return
+      const canvas = buildFlagMap(countries, imgs, 4096, 2048)
+      const tex = new CanvasTexture(canvas)
+      tex.anisotropy = 4
+      GLOBE_MATERIAL.map = tex
+      GLOBE_MATERIAL.emissiveMap = tex
+      GLOBE_MATERIAL.emissive.set(0xffffff)
+      GLOBE_MATERIAL.emissiveIntensity = 0.5 // 讓背光面的國旗也看得清
+      GLOBE_MATERIAL.color.set(0xffffff)
+      GLOBE_MATERIAL.needsUpdate = true
+    })()
+    return () => {
+      alive = false
+    }
+  }, [countries])
+
   const matched = useCallback((feat) => (feat ? COUNTRY_BY_ADMIN[feat.properties.ADMIN] : null), [])
 
-  const capColor = useCallback(
-    (feat) => {
-      const data = matched(feat)
-      const isHover = hover && feat === hover
-      if (data) return isHover ? NORD.matchedHover : NORD.matched
-      return isHover ? NORD.landHover : NORD.land
-    },
-    [hover, matched]
-  )
+  // 多邊形層僅供互動與懸停高亮（國旗/國界已烤進貼圖）
+  const capColor = useCallback((feat) => (hover && feat === hover ? HOVER_CAP : 'rgba(0,0,0,0)'), [hover])
+  const altitude = useCallback((feat) => (hover && feat === hover ? HOVER_ALT : 0.002), [hover])
 
-  const altitude = useCallback((feat) => (hover && feat === hover ? HOVER_ALT : 0.004), [hover])
-
-  // 每個國家的國旗貼片資料
-  const flagData = useMemo(() => {
-    const out = []
-    for (const f of countries) {
-      const code = flagCode(f)
-      if (!code) continue
-      const polys = topPolygons(f)
-      if (!polys.length) continue
-      out.push({ admin: f.properties.ADMIN, code, matched: !!matched(f), polygons: polys })
-    }
-    return out
-  }, [countries, matched])
-
-  // 用 ConicPolygonGeometry 把國旗貼進國家輪廓、順著球面（UV 自動對應 bbox）
-  const buildFlag = useCallback((d) => {
-    const group = new Group()
-    const tex = flagTex(d.code)
-    const opacity = d.matched ? 0.9 : 0.82 // 提高不透明度，國旗顏色更實
-    for (const poly of d.polygons) {
-      try {
-        const geo = new ConicPolygonGeometry(poly, FLAG_LO, FLAG_HI, false, true, false, 14)
-        const mat = new MeshBasicMaterial({
-          map: tex,
-          transparent: true,
-          opacity,
-          side: DoubleSide,
-          depthWrite: false,
-          polygonOffset: true,
-          polygonOffsetFactor: -4,
-          polygonOffsetUnits: -4,
-        })
-        const mesh = new Mesh(geo, mat)
-        mesh.raycast = () => {} // 點擊穿透，交給底下的國家多邊形
-        group.add(mesh)
-      } catch {
-        // 個別多邊形（如跨換日線）建立失敗時略過
-      }
-    }
-    group.userData.flagAdmin = d.admin
-    group.renderOrder = 3
-    return group
-  }, [])
-
-  // 懸停時把該國國旗也一起抬升（與多邊形浮起同步），做出「懸浮」效果
-  useEffect(() => {
-    const globe = globeRef.current
-    const scene = globe && globe.scene && globe.scene()
-    if (!scene) return
-    const hoverAdmin = hover?.properties?.ADMIN
-    scene.traverse((obj) => {
-      if (obj.userData && obj.userData.flagAdmin) {
-        obj.scale.setScalar(obj.userData.flagAdmin === hoverAdmin ? HOVER_SCALE : 1)
-      }
-    })
-  }, [hover, flagData])
-
-  // 標籤：只留較大/重要的國家英文名（LABELRANK<=3，標籤瘦身）+ 幾個大洋名稱
   const labelData = useMemo(() => {
     const cc = countries
       .filter((f) => (f.properties.LABELRANK ?? 9) <= 3)
@@ -223,11 +203,10 @@ export default function WorldGlobe() {
           : null
       })
       .filter(Boolean)
-    const oc = OCEANS.map((o) => ({ ...o, size: 2.2, color: 'rgba(31, 64, 102, 0.55)' }))
+    const oc = OCEANS.map((o) => ({ ...o, size: 2.2, color: 'rgba(31, 64, 102, 0.6)' }))
     return [...cc, ...oc]
   }, [countries])
 
-  // 點擊國家：先把鏡頭「鑽入」該國，再進入國家頁
   const diveTo = useCallback(
     (feat) => {
       const data = matched(feat)
@@ -256,17 +235,14 @@ export default function WorldGlobe() {
         width={size.w}
         height={size.h}
         backgroundColor="rgba(0,0,0,0)"
-        globeMaterial={OCEAN_MATERIAL}
-        atmosphereColor="#bcd6ef"
-        atmosphereAltitude={0.15}
+        globeMaterial={GLOBE_MATERIAL}
+        showAtmosphere={false}
         polygonsData={countries}
         polygonAltitude={altitude}
         polygonCapColor={capColor}
-        polygonSideColor={() => NORD.side}
-        polygonStrokeColor={() => NORD.stroke}
+        polygonSideColor={() => 'rgba(0,0,0,0)'}
+        polygonStrokeColor={() => 'rgba(0,0,0,0)'}
         polygonsTransitionDuration={0}
-        customLayerData={flagData}
-        customThreeObject={buildFlag}
         labelsData={labelData}
         labelLat={(d) => d.lat}
         labelLng={(d) => d.lng}
@@ -275,12 +251,12 @@ export default function WorldGlobe() {
         labelColor={(d) => d.color}
         labelResolution={2}
         labelDotRadius={0}
-        labelAltitude={0.02}
+        labelAltitude={0.015}
         onPolygonHover={setHover}
         onPolygonClick={diveTo}
       />
     ),
-    [countries, size, altitude, capColor, flagData, buildFlag, labelData, diveTo]
+    [countries, size, altitude, capColor, labelData, diveTo]
   )
 
   return (
