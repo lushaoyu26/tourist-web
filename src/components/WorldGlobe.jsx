@@ -166,7 +166,7 @@ async function buildFlagMap(features, W, H) {
 
 // 首頁 3D 地球：國旗烤進地表貼圖（不透明、無大氣疊算）= 順；懸停浮起高亮、點擊鑽入國家頁。
 
-export default function WorldGlobe() {
+export default function WorldGlobe({ focus = null }) {
   const globeRef = useRef()
   const wrapRef = useRef()
   const navigate = useNavigate()
@@ -207,8 +207,24 @@ export default function WorldGlobe() {
   useEffect(() => {
     const globe = globeRef.current
     if (!globe) return
-    globe.controls().autoRotate = !hover && !diving
-  }, [hover, diving])
+    globe.controls().autoRotate = !hover && !diving && !focus
+  }, [hover, diving, focus])
+
+  // 捲動穿越各大洲：focus 改變時把鏡頭飛到該洲（無 focus = 總覽 + 自轉）
+  const fLat = focus?.lat
+  const fLng = focus?.lng
+  const fAlt = focus?.altitude
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe) return
+    if (fLat != null) {
+      globe.controls().autoRotate = false
+      globe.pointOfView({ lat: fLat, lng: fLng, altitude: fAlt ?? 1.6 }, 1400)
+    } else {
+      globe.controls().autoRotate = true
+      globe.pointOfView({ lat: 18, lng: 60, altitude: 2.4 }, 1400)
+    }
+  }, [fLat, fLng, fAlt])
 
   // 烤國旗世界地圖 → 貼到地球材質（不打光，全亮、無明暗交界閃爍）
   useEffect(() => {

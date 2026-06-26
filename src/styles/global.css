@@ -3448,3 +3448,159 @@ button.coupon-code { color: inherit; }
   .at-title { font-size: clamp(2.4rem, 13vw, 4rem); }
   .at-lite-toggle { bottom: 14px; right: 14px; }
 }
+
+/* ============ 首頁 activetheory：捲動穿越各大洲 ============ */
+.home-at.at-journey {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+}
+/* vignette / 粒子改 fixed，捲動時固定覆蓋視窗 */
+.at-journey::before { position: fixed; z-index: 1; }
+.at-journey .particle-field { position: fixed; z-index: 1; }
+
+.at-globe-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* 乾淨大標題（修掉怪框線：不用 overflow/漸層裁切） */
+.at-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 8.5vw, 7rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: #fff;
+  text-shadow: 0 6px 50px rgba(50, 100, 220, 0.35);
+}
+
+.at-sec {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 9vh 6vw;
+}
+.at-intro { justify-content: flex-start; }
+
+/* 開場 hero：重置先前 absolute 定位，改在區段內 */
+.at-journey .at-hero {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  max-width: min(640px, 88vw);
+}
+.at-journey .at-hero::before { display: none; }
+
+/* 開場進場動畫（CSS 自動播放、播一次） */
+@keyframes at-fade-up {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+.at-intro .at-eyebrow { animation: at-fade-up 0.8s 0.05s both cubic-bezier(0.2, 0.7, 0.2, 1); }
+.at-intro .at-title { animation: at-fade-up 0.95s 0.16s both cubic-bezier(0.2, 0.7, 0.2, 1); }
+.at-intro .at-sub { animation: at-fade-up 0.95s 0.36s both cubic-bezier(0.2, 0.7, 0.2, 1); }
+.at-intro .at-actions { animation: at-fade-up 0.95s 0.52s both cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+/* 大洲區段：面板靠右，地球聚焦該洲在左後方 */
+.at-continent { justify-content: flex-end; }
+.at-cont-panel {
+  width: min(440px, 92vw);
+  padding: 28px 28px 24px;
+  border-radius: 24px;
+  background: rgba(7, 12, 28, 0.62);
+  border: 1px solid rgba(120, 160, 255, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(46px) scale(0.98);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.at-continent.on .at-cont-panel { opacity: 1; transform: none; }
+.at-cont-index {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: rgba(150, 190, 255, 0.65);
+}
+.at-cont-index em { font-style: normal; color: rgba(150, 190, 255, 0.32); }
+.at-cont-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 6px 0 3px;
+  background: linear-gradient(110deg, #c5e3ff, #6e8cff 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.at-cont-zh { color: rgba(200, 220, 255, 0.65); font-size: 0.95rem; margin-bottom: 18px; }
+.at-cont-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.at-cont-grid::-webkit-scrollbar { width: 6px; }
+.at-cont-grid::-webkit-scrollbar-thumb { background: rgba(150, 190, 255, 0.25); border-radius: 3px; }
+.at-cont-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(150, 190, 255, 0.1);
+  color: #e6eeff;
+  font-size: 0.9rem;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.at-cont-card:hover {
+  background: rgba(120, 160, 255, 0.16);
+  border-color: rgba(150, 190, 255, 0.5);
+  transform: translateY(-2px);
+}
+.at-cc-flag { font-size: 1.15rem; }
+.at-cc-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.at-cc-count { font-size: 0.72rem; color: rgba(150, 190, 255, 0.6); }
+
+.at-scrollcue {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: rgba(190, 212, 250, 0.55);
+  animation: at-cue 1.9s ease-in-out infinite;
+}
+.at-scrollcue-arrow { font-size: 1.1rem; }
+@keyframes at-cue { 50% { transform: translateX(-50%) translateY(7px); opacity: 0.5; } }
+
+.home-at.lite .at-intro * { animation: none !important; opacity: 1 !important; transform: none !important; }
+.home-at.lite .at-cont-panel { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .at-intro * { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .at-scrollcue { animation: none; }
+}
+
+@media (max-width: 760px) {
+  .at-continent { justify-content: center; }
+  .at-cont-panel { width: 100%; }
+  .at-cont-grid { max-height: 42vh; }
+  .at-sec { padding: 8vh 22px; }
+}
