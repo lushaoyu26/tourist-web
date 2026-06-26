@@ -8,6 +8,7 @@ import CitySearch from './CitySearch.jsx'
 
 export default function NavBar() {
   const { pathname } = useLocation()
+  const onHome = pathname === '/'
   const [open, setOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const panelRef = useRef(null)
@@ -41,7 +42,7 @@ export default function NavBar() {
   const featured = FEATURED_IDS.slice(0, 4).map((id) => COUNTRY_BY_ID[id])
 
   return (
-    <header className="navbar">
+    <header className={`navbar ${onHome ? 'navbar-dark' : ''}`}>
       <Link to="/" className="navbar-logo">
         <span className="navbar-logo-icon">🌏</span>
         <span className="navbar-logo-text">

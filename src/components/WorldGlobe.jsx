@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { COUNTRY_BY_ADMIN, ADMIN_ZH } from '../data/index.js'
 
 // 地球材質：不打光（避免明暗交界掃過造成「灰色閃爍」與背光面偏暗）；國旗地圖烤好後貼上 map
-const OCEAN = '#8bb8dd'
+const OCEAN = '#0a1730' // 深色海洋（電影感）：亮色國旗在深海上發光
 const GLOBE_MATERIAL = new MeshBasicMaterial({ color: OCEAN })
 
 const OCEANS = [
@@ -274,11 +274,11 @@ export default function WorldGlobe() {
       .map((f) => {
         const c = featureCenter(f)
         return c
-          ? { lat: c.lat, lng: c.lng, text: f.properties.NAME || f.properties.ADMIN, size: 1.0, color: 'rgba(20, 30, 45, 0.95)' }
+          ? { lat: c.lat, lng: c.lng, text: f.properties.NAME || f.properties.ADMIN, size: 1.0, color: 'rgba(228, 240, 255, 0.92)' }
           : null
       })
       .filter(Boolean)
-    const oc = OCEANS.map((o) => ({ ...o, size: 2.2, color: 'rgba(31, 64, 102, 0.6)' }))
+    const oc = OCEANS.map((o) => ({ ...o, size: 2.2, color: 'rgba(150, 190, 235, 0.5)' }))
     return [...cc, ...oc]
   }, [countries])
 
@@ -311,7 +311,9 @@ export default function WorldGlobe() {
         height={size.h}
         backgroundColor="rgba(0,0,0,0)"
         globeMaterial={GLOBE_MATERIAL}
-        showAtmosphere={false}
+        showAtmosphere={true}
+        atmosphereColor="#3f7bff"
+        atmosphereAltitude={0.26}
         polygonsData={countries}
         polygonAltitude={altitude}
         polygonCapColor={capColor}

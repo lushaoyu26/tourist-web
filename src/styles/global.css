@@ -302,18 +302,19 @@ img {
   height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(1100px 760px at 82% 4%, #fbfdff 0%, transparent 60%),
-    radial-gradient(820px 640px at 6% 98%, #c5d4e6 0%, transparent 58%),
-    linear-gradient(180deg, #e9eef5 0%, #d2dded 100%);
-  color: var(--nord-ink);
+    radial-gradient(1200px 900px at 68% 32%, #0f1d44 0%, transparent 60%),
+    radial-gradient(900px 720px at 18% 82%, #0a1632 0%, transparent 55%),
+    linear-gradient(180deg, #04060f 0%, #05091a 55%, #03050d 100%);
+  color: #eaf2ff;
 }
 
-/* 極淡霧藍暈影，增加層次 */
+/* 電影感暗角 vignette，聚焦中央 */
 .home::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(900px 620px at 18% 92%, rgba(79, 113, 145, 0.12), transparent 62%);
+  z-index: 6;
+  background: radial-gradient(125% 125% at 50% 48%, transparent 52%, rgba(0, 0, 0, 0.62) 100%);
   pointer-events: none;
 }
 
@@ -3205,4 +3206,245 @@ button.coupon-code { color: inherit; }
 @media (max-width: 540px) {
   .coupon-grid { grid-template-columns: 1fr; }
   .coupon-go { margin-left: 0; }
+}
+
+/* ============ 首頁 activetheory 風格（深色電影感） ============ */
+.home-at .globe-loading { color: rgba(200, 220, 255, 0.7); }
+
+/* 粒子星空 */
+.particle-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 7;
+  pointer-events: none;
+}
+
+/* 中央氛圍光暈 */
+.at-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 78vmin;
+  height: 78vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(63, 123, 255, 0.22), rgba(63, 123, 255, 0.05) 46%, transparent 70%);
+  filter: blur(24px);
+  animation: at-glow-pulse 7s ease-in-out infinite;
+}
+@keyframes at-glow-pulse {
+  50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+/* HERO 大字排版 */
+.at-hero {
+  position: absolute;
+  left: max(6vw, 30px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  max-width: min(680px, 84vw);
+  pointer-events: none;
+}
+.at-hero > * { pointer-events: auto; }
+/* 文字後方柔暗罩，確保大字在亮色地球上清楚 */
+.at-hero::before {
+  content: '';
+  position: absolute;
+  left: -12vw;
+  top: 50%;
+  width: 62vw;
+  height: 90vh;
+  transform: translateY(-50%);
+  background: radial-gradient(58% 56% at 32% 50%, rgba(2, 5, 14, 0.62), transparent 72%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.at-eyebrow {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #7fb0ff;
+  margin-bottom: 18px;
+}
+
+.at-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 8.4vw, 7rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  color: #fff;
+  text-shadow: 0 8px 40px rgba(4, 8, 24, 0.7);
+}
+.at-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+.at-line:nth-child(2) {
+  background: linear-gradient(110deg, #9fd0ff 10%, #6e8cff 60%, #b98cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.reveal-up {
+  display: inline-block;
+  transform: translateY(116%);
+  transition: transform 1s cubic-bezier(0.16, 0.84, 0.27, 1);
+}
+.home-at.loaded .reveal-up { transform: translateY(0); }
+
+.at-sub {
+  margin-top: 22px;
+  max-width: 42ch;
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+  line-height: 1.6;
+  color: rgba(206, 222, 252, 0.8);
+}
+
+.at-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.at-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 15px 30px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s, background 0.3s, border-color 0.3s;
+  will-change: transform;
+}
+.at-btn-primary {
+  color: #04060f;
+  background: linear-gradient(120deg, #9fd6ff, #5b8cff);
+  box-shadow: 0 12px 44px rgba(91, 140, 255, 0.45);
+}
+.at-btn-primary:hover { box-shadow: 0 18px 60px rgba(91, 140, 255, 0.62); }
+.at-btn-ghost {
+  color: #dce9ff;
+  border: 1px solid rgba(150, 190, 255, 0.35);
+  background: rgba(120, 160, 255, 0.06);
+  backdrop-filter: blur(8px);
+}
+.at-btn-ghost:hover { border-color: rgba(150, 190, 255, 0.7); background: rgba(120, 160, 255, 0.14); }
+.magnetic { transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+.at-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  z-index: 10;
+  text-align: center;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  color: rgba(190, 212, 250, 0.5);
+}
+
+.at-lite-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 30;
+  padding: 9px 15px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cfe0ff;
+  background: rgba(18, 28, 54, 0.6);
+  border: 1px solid rgba(150, 190, 255, 0.25);
+  backdrop-filter: blur(10px);
+  transition: border-color 0.25s, background 0.25s;
+}
+.at-lite-toggle:hover { border-color: rgba(150, 190, 255, 0.6); background: rgba(28, 42, 78, 0.7); }
+
+/* 進場淡入（eyebrow / sub / actions / hint） */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.home-at.loaded .reveal { opacity: 1; transform: none; }
+.at-eyebrow.reveal { transition-delay: 0.05s; }
+.at-title .at-line:nth-child(1) .reveal-up { transition-delay: 0.12s; }
+.at-title .at-line:nth-child(2) .reveal-up { transition-delay: 0.24s; }
+.at-sub.reveal { transition-delay: 0.44s; }
+.at-actions.reveal { transition-delay: 0.56s; }
+.at-hint.reveal { transition-delay: 0.85s; }
+
+/* 自訂游標 */
+.has-custom-cursor,
+.has-custom-cursor * { cursor: none !important; }
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.cursor-dot {
+  width: 7px;
+  height: 7px;
+  background: #cfe6ff;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(150, 200, 255, 0.6);
+  transition: width 0.25s, height 0.25s, border-color 0.25s, background 0.25s;
+}
+.cursor-hover .cursor-ring {
+  width: 58px;
+  height: 58px;
+  border-color: rgba(150, 200, 255, 0.9);
+  background: rgba(120, 180, 255, 0.12);
+}
+.cursor-down .cursor-ring { width: 26px; height: 26px; }
+
+/* 懸停資訊卡：深色玻璃 */
+.home-at .globe-card {
+  background: rgba(9, 16, 36, 0.84);
+  border-color: rgba(120, 170, 255, 0.28);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.55);
+}
+.home-at .globe-card h3 { color: #fff; }
+.home-at .globe-card-en { color: rgba(170, 200, 255, 0.7); }
+.home-at .globe-card-tagline { color: #8fbcff; }
+.home-at .globe-card-desc { color: rgba(208, 224, 255, 0.78); }
+.home-at .globe-card-label { color: #8fd0ff; }
+.home-at .globe-card-list li { color: rgba(220, 232, 255, 0.85); }
+.home-at .globe-card-foot { border-top-color: rgba(150, 190, 255, 0.16); color: rgba(180, 205, 255, 0.7); }
+.home-at .globe-card-cta { color: #ffd479; }
+
+/* 精簡模式：關閉進場動畫與光暈脈動（粒子/游標已不掛載） */
+.home-at.lite .reveal,
+.home-at.lite .reveal-up { opacity: 1 !important; transform: none !important; transition: none !important; }
+.home-at.lite .at-glow { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-up { transition: none !important; opacity: 1 !important; transform: none !important; }
+  .at-glow { animation: none; }
+}
+
+@media (max-width: 760px) {
+  .at-hero { left: 24px; right: 24px; max-width: none; top: 44%; }
+  .at-title { font-size: clamp(2.4rem, 13vw, 4rem); }
+  .at-lite-toggle { bottom: 14px; right: 14px; }
 }
